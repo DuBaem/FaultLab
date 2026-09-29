@@ -1,6 +1,7 @@
+import os
 import requests
 
-BASE_URL = "http://127.0.0.1:5000"
+BASE_URL = os.getenv("SERVER_URL", "http://127.0.0.1:5000")
 
 health_response = requests.get(f"{BASE_URL}/health")
 print("Health:", health_response.json())

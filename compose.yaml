@@ -1,0 +1,18 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    container_name: faultlab-server
+    ports:
+      - "5000:5000"
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: faultlab-client
+    environment:
+      SERVER_URL: http://server:5000
+    depends_on:
+      - server

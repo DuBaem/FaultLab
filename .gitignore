@@ -216,3 +216,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# FaultLab baseline run output (keep the folder, not the generated runs)
+results/*.json
+!results/.gitkeep

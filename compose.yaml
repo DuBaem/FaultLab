@@ -6,6 +6,13 @@ services:
     container_name: faultlab-server
     ports:
       - "5000:5000"
+    healthcheck:
+      # python:3.12-slim has no curl, so check /health with the stdlib instead.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
   client:
     build:
@@ -15,4 +22,20 @@ services:
     environment:
       SERVER_URL: http://server:5000
     depends_on:
-      - server
+      server:
+        condition: service_healthy
+
+  baseline:
+    build:
+      context: .
+      dockerfile: baseline/Dockerfile
+    container_name: faultlab-baseline
+    environment:
+      SERVER_URL: http://server:5000
+    depends_on:
+      server:
+        condition: service_healthy
+    volumes:
+      - ./results:/app/results
+    profiles:
+      - baseline

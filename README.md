@@ -110,6 +110,53 @@ Then clean up the containers and network with:
 
 `docker compose down`
 
+## Running the Baseline
+
+The baseline workload sends repeated `/process` requests to the server, times each one, checks that the response is actually correct (not just a 200 status), and saves simple summary statistics.
+
+The `baseline` service does not start with a normal `docker compose up`. It only runs when you ask for it:
+
+`docker compose run --rm baseline`
+
+This waits for the server's Docker healthcheck to pass, runs the configured number of requests, prints a short summary, and saves a results file.
+
+You can adjust the run with environment variables (defaults shown):
+
+- `BASELINE_REQUESTS=20`
+- `REQUEST_TIMEOUT_SECONDS=3`
+- `HEALTH_TIMEOUT_SECONDS=30`
+
+Example with a smaller run:
+
+`docker compose run --rm -e BASELINE_REQUESTS=5 baseline`
+
+### Where Results Are Saved
+
+Each run writes a timestamped JSON file to the `results/` folder on the host, e.g. `results/baseline_20261021T073133Z.json`. It contains the server URL, start/finish times, every individual request result, and the summary statistics (success rate, min/max/mean/median/standard deviation latency).
+
+These generated result files are not committed to the repository; only the `results/` folder itself is tracked.
+
+## Running the Reset Workflow
+
+`reset.py` returns the environment to a known-good state: it stops the current Compose environment, rebuilds a clean server, waits for it to become healthy, and checks `/health` and `/process` to confirm it behaves correctly.
+
+`python reset.py`
+
+A successful run prints `RESET PASSED` and exits with code `0`. A failed run prints `RESET FAILED` with a reason and exits with a non-zero code.
+
+This script only resets the container-level environment. It does not clean up fault-injection state (`tc`/`netem`); that will be integrated separately as the fault-injection component is built.
+
+## Running the Tests
+
+Test dependencies (`pytest`) are kept separate from the runtime `requirements.txt`, in `requirements-dev.txt`.
+
+```
+pip install -r requirements-dev.txt
+pytest tests/
+```
+
+Most tests run without Docker at all, by checking the baseline logic directly (summary statistics, response validation, and failure handling). One test in `tests/test_integration.py` talks to a real server and is skipped automatically if nothing is running at `SERVER_URL`.
+
 ## Project Structure
 
 - `client/`
@@ -118,8 +165,18 @@ Then clean up the containers and network with:
 - `server/`
   - `server.py`
   - `Dockerfile`
+- `baseline/`
+  - `baseline.py`
+  - `Dockerfile`
+- `tests/`
+  - `conftest.py`
+  - `test_baseline.py`
+  - `test_integration.py`
+- `results/`
+- `reset.py`
 - `compose.yaml`
 - `requirements.txt`
+- `requirements-dev.txt`
 - `README.md`
 - `.gitignore`
 
@@ -313,8 +370,3 @@ flowchart LR
 The client and server are both running in Docker containers and successfully communicating through the Docker network.
 
 This provides the shared test environment required for the next phase of FaultLab development.
-"""
-
-path = Path("/mnt/data/README.md")
-path.write_text(content, encoding="utf-8")
-print(f"Created {path}")

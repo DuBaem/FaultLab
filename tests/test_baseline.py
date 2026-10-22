@@ -85,7 +85,10 @@ def test_run_request_fails_on_wrong_result():
 
 
 def test_run_request_fails_on_mismatched_request_id():
-    response = make_response(200, {"request_id": "different-id", "status": "success", "result": 20})
+    response = make_response(
+        200,
+        {"request_id": "different-id", "status": "success", "result": 20},
+    )
     with patch.object(baseline.requests, "post", return_value=response):
         result = baseline.run_request("http://server", "r1", 10, 3)
 
@@ -107,3 +110,24 @@ def test_run_request_records_timeout_instead_of_raising():
 
     assert result["success"] is False
     assert "timed out" in result["error"]
+
+
+def test_main_waits_between_requests_when_interval_is_configured(monkeypatch):
+    monkeypatch.setattr(baseline, "BASELINE_REQUESTS", 2)
+    monkeypatch.setattr(baseline, "REQUEST_INTERVAL_SECONDS", 0.25)
+    monkeypatch.setattr(baseline, "wait_for_health", lambda *_args: True)
+    monkeypatch.setattr(
+        baseline,
+        "save_results",
+        lambda *_args: baseline.Path("results/test-baseline.json"),
+    )
+    monkeypatch.setattr(
+        baseline,
+        "run_request",
+        lambda *_args: {"success": True, "latency_ms": 10.0},
+    )
+
+    with patch.object(baseline.time, "sleep") as sleep:
+        baseline.main()
+
+    sleep.assert_called_once_with(0.25)

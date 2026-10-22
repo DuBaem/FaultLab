@@ -11,6 +11,7 @@ SERVER_URL = os.getenv("SERVER_URL", "http://127.0.0.1:5000")
 BASELINE_REQUESTS = int(os.getenv("BASELINE_REQUESTS", "20"))
 REQUEST_TIMEOUT_SECONDS = float(os.getenv("REQUEST_TIMEOUT_SECONDS", "3"))
 HEALTH_TIMEOUT_SECONDS = float(os.getenv("HEALTH_TIMEOUT_SECONDS", "30"))
+REQUEST_INTERVAL_SECONDS = float(os.getenv("REQUEST_INTERVAL_SECONDS", "0"))
 
 # Relative to the current working directory so this matches both a local run
 # from the repo root and the container, where WORKDIR and the results volume
@@ -133,6 +134,8 @@ def main():
     for i in range(BASELINE_REQUESTS):
         request_id = f"baseline-{i:04d}"
         results.append(run_request(SERVER_URL, request_id, 10, REQUEST_TIMEOUT_SECONDS))
+        if REQUEST_INTERVAL_SECONDS > 0 and i < BASELINE_REQUESTS - 1:
+            time.sleep(REQUEST_INTERVAL_SECONDS)
     finished_at = datetime.now(timezone.utc).isoformat()
 
     summary = calculate_summary(results)
@@ -148,8 +151,10 @@ def main():
 
     output_path = save_results(run_data, RESULTS_DIR)
 
-    print(f"Baseline complete: {summary['successful_requests']}/{summary['total_requests']} succeeded "
-          f"({summary['success_rate']:.1f}%)")
+    print(
+        f"Baseline complete: {summary['successful_requests']}/"
+        f"{summary['total_requests']} succeeded ({summary['success_rate']:.1f}%)"
+    )
     if summary["latency_ms"]["mean"] is not None:
         print(f"Latency (ms) - min: {summary['latency_ms']['min']:.1f}, "
               f"max: {summary['latency_ms']['max']:.1f}, "

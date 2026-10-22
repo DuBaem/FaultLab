@@ -151,6 +151,7 @@ activemq-data/
 .env
 .envrc
 .venv
+.tmp/
 env/
 venv/
 ENV/
@@ -219,4 +220,5 @@ __marimo__/
 
 # FaultLab baseline run output (keep the folder, not the generated runs)
 results/*.json
+results/experiments/
 !results/.gitkeep

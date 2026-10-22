@@ -32,13 +32,23 @@ def wait_for_health(server_url, timeout_s):
 
 
 def verify_process(server_url):
-    # Reuse the same predictable workload the baseline uses: value=10 should always come back as 20.
+    # Reuse the predictable baseline workload: value=10 should always return 20.
     response = requests.post(
         f"{server_url}/process",
         json={"request_id": "reset-check", "value": 10},
         timeout=3,
     )
     return response.status_code == 200 and response.json().get("result") == 20
+
+
+def verify_no_active_netem():
+    result = subprocess.run(
+        ["docker", "compose", "exec", "-T", "server", "tc", "qdisc", "show", "dev", "eth0"],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    return result.returncode == 0 and "netem" not in result.stdout.lower()
 
 
 def main():
@@ -74,7 +84,11 @@ def main():
         print(f"RESET FAILED: {exc}")
         return 1
 
-    # Fault-injection cleanup (Fidel's scenario-control work) hooks in here once it exists.
+    # Recreating the container removes any stale qdisc state. Verify that the
+    # rebuilt interface is clean instead of assuming the reset succeeded.
+    if not verify_no_active_netem():
+        print("RESET FAILED: an active tc/netem rule remains on the server interface.")
+        return 1
 
     print("RESET PASSED")
     return 0

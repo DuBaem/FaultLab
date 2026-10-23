@@ -100,7 +100,10 @@ def test_run_request_fails_on_wrong_result():
 
 
 def test_run_request_fails_on_mismatched_request_id():
-    response = make_response(200, {"request_id": "different-id", "status": "success", "result": 20})
+    response = make_response(
+        200,
+        {"request_id": "different-id", "status": "success", "result": 20},
+    )
     with patch.object(baseline.requests, "post", return_value=response):
         result = baseline.run_request("http://server", "r1", 10, 3)
 
@@ -124,6 +127,30 @@ def test_run_request_records_timeout_instead_of_raising():
     assert "timed out" in result["error"]
 
 
+def test_main_waits_between_requests_when_interval_is_configured(monkeypatch):
+    monkeypatch.setattr(
+        baseline,
+        "load_config",
+        lambda: ("http://server", 2, 3.0, 30.0, 0.25),
+    )
+    monkeypatch.setattr(baseline, "wait_for_health", lambda *_args: True)
+    monkeypatch.setattr(
+        baseline,
+        "save_results",
+        lambda *_args: baseline.Path("results/test-baseline.json"),
+    )
+    monkeypatch.setattr(
+        baseline,
+        "run_request",
+        lambda *_args: {"success": True, "latency_ms": 10.0},
+    )
+
+    with patch.object(baseline.time, "sleep") as sleep:
+        baseline.main()
+
+    sleep.assert_called_once_with(0.25)
+
+
 # --- load_config ---
 
 def test_load_config_valid():
@@ -132,14 +159,16 @@ def test_load_config_valid():
         "BASELINE_REQUESTS": "5",
         "REQUEST_TIMEOUT_SECONDS": "2",
         "HEALTH_TIMEOUT_SECONDS": "10",
+        "REQUEST_INTERVAL_SECONDS": "0.25",
     }
     with patch.dict(os.environ, env, clear=False):
-        server_url, baseline_requests, request_timeout, health_timeout = baseline.load_config()
+        server_url, baseline_requests, request_timeout, health_timeout, request_interval = baseline.load_config()
 
     assert server_url == "http://server"
     assert baseline_requests == 5
     assert request_timeout == 2.0
     assert health_timeout == 10.0
+    assert request_interval == 0.25
 
 
 @pytest.mark.parametrize("raw_value", ["abc", "1.5"])
@@ -168,3 +197,17 @@ def test_load_config_rejects_non_positive_health_timeout(raw_value):
     with patch.dict(os.environ, {"HEALTH_TIMEOUT_SECONDS": raw_value}, clear=False):
         with pytest.raises(SystemExit):
             baseline.load_config()
+
+
+@pytest.mark.parametrize("raw_value", ["abc", "-1"])
+def test_load_config_rejects_invalid_request_interval(raw_value):
+    with patch.dict(os.environ, {"REQUEST_INTERVAL_SECONDS": raw_value}, clear=False):
+        with pytest.raises(SystemExit):
+            baseline.load_config()
+
+
+def test_load_config_accepts_zero_request_interval():
+    with patch.dict(os.environ, {"REQUEST_INTERVAL_SECONDS": "0"}, clear=False):
+        *_, request_interval = baseline.load_config()
+
+    assert request_interval == 0.0

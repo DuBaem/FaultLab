@@ -43,12 +43,28 @@ def _parse_positive_float(name, default):
     return value
 
 
+def _parse_nonnegative_float(name, default):
+    raw = os.getenv(name, str(default))
+    try:
+        value = float(raw)
+    except ValueError:
+        print(f"Invalid configuration: {name}={raw!r} is not a number.")
+        raise SystemExit(1)
+
+    if value < 0:
+        print(f"Invalid configuration: {name}={value} must be >= 0.")
+        raise SystemExit(1)
+
+    return value
+
+
 def load_config():
     server_url = os.getenv("SERVER_URL", "http://127.0.0.1:5000")
     baseline_requests = _parse_int("BASELINE_REQUESTS", default=20, minimum=1)
     request_timeout = _parse_positive_float("REQUEST_TIMEOUT_SECONDS", default=3)
     health_timeout = _parse_positive_float("HEALTH_TIMEOUT_SECONDS", default=30)
-    return server_url, baseline_requests, request_timeout, health_timeout
+    request_interval = _parse_nonnegative_float("REQUEST_INTERVAL_SECONDS", default=0)
+    return server_url, baseline_requests, request_timeout, health_timeout, request_interval
 
 
 def wait_for_health(server_url, timeout_s):
@@ -154,7 +170,7 @@ def save_results(run_data, results_dir):
 
 
 def main():
-    server_url, baseline_requests, request_timeout, health_timeout = load_config()
+    server_url, baseline_requests, request_timeout, health_timeout, request_interval = load_config()
 
     print(f"Waiting for server at {server_url} to become healthy...")
     if not wait_for_health(server_url, health_timeout):
@@ -168,6 +184,8 @@ def main():
     for i in range(baseline_requests):
         request_id = f"baseline-{i:04d}"
         results.append(run_request(server_url, request_id, 10, request_timeout))
+        if request_interval > 0 and i < baseline_requests - 1:
+            time.sleep(request_interval)
     finished_at = datetime.now(timezone.utc).isoformat()
 
     summary = calculate_summary(results)
@@ -183,8 +201,10 @@ def main():
 
     output_path = save_results(run_data, RESULTS_DIR)
 
-    print(f"Baseline complete: {summary['successful_requests']}/{summary['total_requests']} succeeded "
-          f"({summary['success_rate']:.1f}%)")
+    print(
+        f"Baseline complete: {summary['successful_requests']}/"
+        f"{summary['total_requests']} succeeded ({summary['success_rate']:.1f}%)"
+    )
     if summary["latency_ms"]["mean"] is not None:
         print(f"Latency (ms) - min: {summary['latency_ms']['min']:.1f}, "
               f"max: {summary['latency_ms']['max']:.1f}, "

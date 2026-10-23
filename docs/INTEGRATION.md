@@ -62,6 +62,7 @@ The server currently doubles `value` (`result = value * 2`).
 - `BASELINE_REQUESTS` — default `20`. Must be an integer `>= 1`.
 - `REQUEST_TIMEOUT_SECONDS` — default `3`. Must be a number `> 0`.
 - `HEALTH_TIMEOUT_SECONDS` — default `30`. Must be a number `> 0`.
+- `REQUEST_INTERVAL_SECONDS` — default `0`. Must be a number `>= 0`. A positive value pauses between requests so a fault can be observed during a longer baseline run.
 
 **Validation:** any invalid value (non-numeric, or out of the ranges above) prints a clear `Invalid configuration: ...` message and exits with code `1` before the server is ever contacted.
 
@@ -103,7 +104,7 @@ The server currently doubles `value` (`result = value * 2`).
 
 **What it currently resets:** the container-level environment only. It runs `docker compose down` (stopping and removing all current containers/network), then `docker compose up -d --build server` (rebuilding and starting a clean `server` container from current source), then verifies the new server is healthy and behaves correctly.
 
-**What it does NOT yet reset:** it does not touch or restart the `client`/`baseline` containers, and it does **not** clean up any fault-injection state (e.g. `tc`/`netem` rules). There is a marked integration point in the code (`# Fault-injection cleanup (Fidel's scenario-control work) hooks in here once it exists.`) for that to be added later — see "Team Decision Required" below.
+**Fault-state cleanup:** recreating the server removes container-level `tc`/`netem` state. The reset then runs `tc qdisc show dev eth0` in the rebuilt server and fails if an active `netem` queue remains. It does not restart one-shot `client` or `baseline` containers.
 
 **Configuration:** `HEALTH_TIMEOUT_SECONDS` (default `30`, must be a number `> 0`) and `SERVER_URL` (default `http://127.0.0.1:5000`), loaded by `load_config()`. An invalid `HEALTH_TIMEOUT_SECONDS` prints a clear message and exits with code `1` before any Docker command runs.
 
@@ -111,13 +112,13 @@ The server currently doubles `value` (`result = value * 2`).
 
 **Health and `/process` verification:** after rebuilding the server and confirming it passes `wait_for_health`, `reset.py` makes its own direct `GET /health` call (expects `200`) and a `POST /process` call with `{"request_id": "reset-check", "value": 10}` (expects `200` and `result == 20`) before declaring success.
 
-**Exit codes:** `0` on `RESET PASSED`. `1` on any failure path — a failed `docker compose` command (including Docker not being installed/running), the server never becoming healthy, or either verification request failing or returning an unexpected result.
+**Exit codes:** `0` on `RESET PASSED`. `1` on any failure path — a failed `docker compose` command (including Docker not being installed/running), the server never becoming healthy, either verification request failing, or an active `netem` queue remaining after recreation.
 
 ### Docker / Compose
 
 **Current services** (exactly as defined in `compose.yaml`): `server`, `client`, `baseline`.
 
-- **`server`** — builds from `server/Dockerfile`, published on host port `5000` (`5000:5000`), has a Docker healthcheck that runs `python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/health', timeout=2)"` every 5 seconds (3-second timeout, 5 retries, 5-second start period).
+- **`server`** — builds from `server/Dockerfile`, includes the Linux `tc` utility, receives only the local `NET_ADMIN` capability required for network-fault experiments, and is published on host port `5000` (`5000:5000`). Its Docker healthcheck runs `python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/health', timeout=2)"` every 5 seconds (3-second timeout, 5 retries, 5-second start period).
 - **`client`** — builds from `client/Dockerfile`, `SERVER_URL=http://server:5000`, `depends_on: server` with `condition: service_healthy` (waits for the healthcheck, not just container start).
 - **`baseline`** — builds from `baseline/Dockerfile`, `SERVER_URL=http://server:5000`, same `depends_on: service_healthy`, mounts `./results:/app/results`, and is gated behind `profiles: [baseline]` — **it is currently still profile-based and does not start on a plain `docker compose up`.** It's run explicitly, e.g. `docker compose run --rm baseline` (optionally with `--build` to guarantee the current source is used).
 
@@ -125,16 +126,11 @@ The server currently doubles `value` (`result = value * 2`).
 
 ## Team Decision Required
 
-The following are explicitly **not** designed or implied by this document or by any existing code, and are left for the team to decide together once Fidel's and Chidera's implementations exist:
+The foundation contracts above remain unchanged. An initial version of the scenario schema, controller interface, fault cleanup, run identity, timestamps, and experiment-bundle structure is now implemented and documented in [integration-contract.md](integration-contract.md).
 
-- Scenario schema — TEAM DECISION REQUIRED
-- Fault-controller interface — TEAM DECISION REQUIRED
-- `tc`/`netem` cleanup interface — TEAM DECISION REQUIRED
-- Process-failure interface — TEAM DECISION REQUIRED
-- Shared run ID convention — TEAM DECISION REQUIRED
-- Shared timestamp convention — TEAM DECISION REQUIRED
-- Event schema — TEAM DECISION REQUIRED
-- Recorder format — TEAM DECISION REQUIRED
-- Replay format — TEAM DECISION REQUIRED
-- Experiment bundle structure — TEAM DECISION REQUIRED
-- Final orchestration between components — TEAM DECISION REQUIRED
+The team must still review that version with the recording/replay component and agree on:
+
+- Any observation fields added by the recorder.
+- Replay input and comparison formats.
+- Final orchestration across baseline, injection, recording, reset, replay, and comparison.
+- Any versioned interface changes discovered during integration.

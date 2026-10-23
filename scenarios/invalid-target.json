@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "invalid-external-target",
+  "description": "This example must be rejected because the target is outside the local allowlist.",
+  "targets": [
+    {
+      "name": "external-api",
+      "service": "public-api"
+    }
+  ],
+  "actions": [
+    {
+      "id": "delay-external",
+      "type": "latency",
+      "target": "external-api",
+      "start_after_seconds": 1,
+      "duration_seconds": 5,
+      "parameters": {
+        "latency_ms": 100
+      }
+    }
+  ],
+  "expected_outcomes": [
+    "Validation rejects the unapproved target before execution."
+  ],
+  "safety": {
+    "scope": "local_docker_only",
+    "cleanup_required": true,
+    "max_total_duration_seconds": 20
+  }
+}

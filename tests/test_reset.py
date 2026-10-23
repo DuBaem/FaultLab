@@ -85,10 +85,24 @@ def test_main_succeeds_on_full_happy_path():
          patch.object(reset, "recreate_server", MagicMock()), \
          patch.object(reset, "wait_for_health", return_value=True), \
          patch.object(reset.requests, "get", return_value=health_response), \
-         patch.object(reset, "verify_process", return_value=True):
+         patch.object(reset, "verify_process", return_value=True), \
+         patch.object(reset, "verify_no_active_netem", return_value=True):
         exit_code = reset.main()
 
     assert exit_code == 0
+
+
+def test_main_fails_when_netem_cleanup_verification_fails():
+    health_response = make_response(200, {})
+    with patch.object(reset, "stop_environment", MagicMock()), \
+         patch.object(reset, "recreate_server", MagicMock()), \
+         patch.object(reset, "wait_for_health", return_value=True), \
+         patch.object(reset.requests, "get", return_value=health_response), \
+         patch.object(reset, "verify_process", return_value=True), \
+         patch.object(reset, "verify_no_active_netem", return_value=False):
+        exit_code = reset.main()
+
+    assert exit_code == 1
 
 
 # --- load_config ---

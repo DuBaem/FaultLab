@@ -22,7 +22,17 @@ jobs:
       # The live integration test needs a real server, so it's run separately
       # in the docker-smoke job instead of relying on it to skip itself here.
       - name: Run unit tests
-        run: python -m pytest tests/test_server.py tests/test_client.py tests/test_baseline.py tests/test_reset.py -v
+        run: >-
+          python -m pytest
+          tests/test_server.py
+          tests/test_client.py
+          tests/test_baseline.py
+          tests/test_reset.py
+          tests/test_scenario_validator.py
+          tests/test_docker_cli.py
+          tests/test_fault_adapters.py
+          tests/test_controller.py
+          -v
 
   docker-smoke:
     name: Docker smoke test

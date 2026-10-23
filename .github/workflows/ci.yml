@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  unit-tests:
+    name: Unit tests (no Docker)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      # The live integration test needs a real server, so it's run separately
+      # in the docker-smoke job instead of relying on it to skip itself here.
+      - name: Run unit tests
+        run: python -m pytest tests/test_server.py tests/test_client.py tests/test_baseline.py tests/test_reset.py -v
+
+  docker-smoke:
+    name: Docker smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # This job runs on its own clean runner, separate from unit-tests, so it
+      # needs its own Python setup before it can run pytest or client.py.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Validate compose.yaml
+        run: docker compose config --quiet
+
+      - name: Build and start the server
+        run: docker compose up -d --build --wait server
+
+      - name: Run the live integration test
+        run: python -m pytest tests/test_integration.py -v
+
+      - name: Run the client against the real server
+        env:
+          SERVER_URL: http://localhost:5000
+        run: python client/client.py
+
+      - name: Run a small containerized baseline workload
+        run: docker compose run --rm --build -e BASELINE_REQUESTS=5 baseline
+
+      - name: Tear down Docker
+        if: always()
+        run: docker compose down

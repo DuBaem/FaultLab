@@ -12,6 +12,8 @@ The project is designed to test how a client-server application behaves under co
 
 The initial client-server test environment is working.
 
+For a detailed reference of the server/client/baseline/reset contracts (request/response shapes, env vars, exit codes), see [docs/INTEGRATION.md](docs/INTEGRATION.md).
+
 ### Implemented
 
 - Python Flask server

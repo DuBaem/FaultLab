@@ -12,6 +12,8 @@ The project is designed to test how a client-server application behaves under co
 
 The initial client-server test environment is working.
 
+For a detailed reference of the server/client/baseline/reset contracts (request/response shapes, env vars, exit codes), see [docs/INTEGRATION.md](docs/INTEGRATION.md).
+
 ### Implemented
 
 - Python Flask server
@@ -38,7 +40,7 @@ The initial client-server test environment is working.
 - Health response: `{'status': 'healthy'}`
 - Process response: `{'request_id': 'req-001', 'result': 20, 'status': 'success'}`
 
-Recording/replay and original-versus-replay comparison remain under development. Live fault execution is implemented, but it must be verified with Docker Desktop running before a classroom demonstration.
+Recording/replay and original-versus-replay comparison remain under development. Live execution of latency, packet loss, disconnection, and process-failure scenarios was verified with Docker Desktop on October 23, 2026; the team should repeat the full sequence before the classroom demonstration.
 
 ## Validate a Scenario
 
@@ -240,7 +242,10 @@ Most tests run without Docker at all, by checking the baseline logic directly (s
 - `tests/`
   - `conftest.py`
   - `test_baseline.py`
+  - `test_client.py`
   - `test_integration.py`
+  - `test_reset.py`
+  - `test_server.py`
   - `test_scenario_validator.py`
   - `test_fault_adapters.py`
   - `test_docker_cli.py`
@@ -248,6 +253,7 @@ Most tests run without Docker at all, by checking the baseline logic directly (s
 - `results/`
 - `reset.py`
 - `compose.yaml`
+- `docs/INTEGRATION.md`
 - `docs/integration-contract.md`
 - `docs/tc-netem-research-notes.md`
 - `faultlab/`
@@ -329,7 +335,7 @@ Current progress:
 - Per-run scenario snapshots, event logs, and timing summaries completed
 - Cleanup verification and reset integration completed
 - Unit-test coverage for successful and interrupted runs completed
-- Live Docker verification still required before the Report 2 demonstration
+- Live Docker verification completed for all four fault types; repeat verification is planned before the Report 2 demonstration
 
 Suggested branch: `fidel/fault-injection`
 

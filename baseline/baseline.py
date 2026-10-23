@@ -7,16 +7,64 @@ from pathlib import Path
 
 import requests
 
-SERVER_URL = os.getenv("SERVER_URL", "http://127.0.0.1:5000")
-BASELINE_REQUESTS = int(os.getenv("BASELINE_REQUESTS", "20"))
-REQUEST_TIMEOUT_SECONDS = float(os.getenv("REQUEST_TIMEOUT_SECONDS", "3"))
-HEALTH_TIMEOUT_SECONDS = float(os.getenv("HEALTH_TIMEOUT_SECONDS", "30"))
-REQUEST_INTERVAL_SECONDS = float(os.getenv("REQUEST_INTERVAL_SECONDS", "0"))
-
 # Relative to the current working directory so this matches both a local run
 # from the repo root and the container, where WORKDIR and the results volume
 # mount both land on "results" under /app.
 RESULTS_DIR = Path(os.getenv("RESULTS_DIR", "results"))
+
+
+def _parse_int(name, default, minimum):
+    raw = os.getenv(name, str(default))
+    try:
+        value = int(raw)
+    except ValueError:
+        print(f"Invalid configuration: {name}={raw!r} is not an integer.")
+        raise SystemExit(1)
+
+    if value < minimum:
+        print(f"Invalid configuration: {name}={value} must be >= {minimum}.")
+        raise SystemExit(1)
+
+    return value
+
+
+def _parse_positive_float(name, default):
+    raw = os.getenv(name, str(default))
+    try:
+        value = float(raw)
+    except ValueError:
+        print(f"Invalid configuration: {name}={raw!r} is not a number.")
+        raise SystemExit(1)
+
+    if value <= 0:
+        print(f"Invalid configuration: {name}={value} must be greater than 0.")
+        raise SystemExit(1)
+
+    return value
+
+
+def _parse_nonnegative_float(name, default):
+    raw = os.getenv(name, str(default))
+    try:
+        value = float(raw)
+    except ValueError:
+        print(f"Invalid configuration: {name}={raw!r} is not a number.")
+        raise SystemExit(1)
+
+    if value < 0:
+        print(f"Invalid configuration: {name}={value} must be >= 0.")
+        raise SystemExit(1)
+
+    return value
+
+
+def load_config():
+    server_url = os.getenv("SERVER_URL", "http://127.0.0.1:5000")
+    baseline_requests = _parse_int("BASELINE_REQUESTS", default=20, minimum=1)
+    request_timeout = _parse_positive_float("REQUEST_TIMEOUT_SECONDS", default=3)
+    health_timeout = _parse_positive_float("HEALTH_TIMEOUT_SECONDS", default=30)
+    request_interval = _parse_nonnegative_float("REQUEST_INTERVAL_SECONDS", default=0)
+    return server_url, baseline_requests, request_timeout, health_timeout, request_interval
 
 
 def wait_for_health(server_url, timeout_s):
@@ -122,27 +170,29 @@ def save_results(run_data, results_dir):
 
 
 def main():
-    print(f"Waiting for server at {SERVER_URL} to become healthy...")
-    if not wait_for_health(SERVER_URL, HEALTH_TIMEOUT_SECONDS):
+    server_url, baseline_requests, request_timeout, health_timeout, request_interval = load_config()
+
+    print(f"Waiting for server at {server_url} to become healthy...")
+    if not wait_for_health(server_url, health_timeout):
         print("Server never became healthy. Aborting baseline run.")
         raise SystemExit(1)
 
-    print(f"Server is healthy. Running {BASELINE_REQUESTS} requests...")
+    print(f"Server is healthy. Running {baseline_requests} requests...")
 
     started_at = datetime.now(timezone.utc).isoformat()
     results = []
-    for i in range(BASELINE_REQUESTS):
+    for i in range(baseline_requests):
         request_id = f"baseline-{i:04d}"
-        results.append(run_request(SERVER_URL, request_id, 10, REQUEST_TIMEOUT_SECONDS))
-        if REQUEST_INTERVAL_SECONDS > 0 and i < BASELINE_REQUESTS - 1:
-            time.sleep(REQUEST_INTERVAL_SECONDS)
+        results.append(run_request(server_url, request_id, 10, request_timeout))
+        if request_interval > 0 and i < baseline_requests - 1:
+            time.sleep(request_interval)
     finished_at = datetime.now(timezone.utc).isoformat()
 
     summary = calculate_summary(results)
 
     run_data = {
-        "server_url": SERVER_URL,
-        "requests_requested": BASELINE_REQUESTS,
+        "server_url": server_url,
+        "requests_requested": baseline_requests,
         "started_at": started_at,
         "finished_at": finished_at,
         "results": results,

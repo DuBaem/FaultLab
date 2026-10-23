@@ -5,8 +5,22 @@ import time
 
 import requests
 
-SERVER_URL = os.getenv("SERVER_URL", "http://127.0.0.1:5000")
-HEALTH_TIMEOUT_SECONDS = float(os.getenv("HEALTH_TIMEOUT_SECONDS", "30"))
+
+def load_config():
+    server_url = os.getenv("SERVER_URL", "http://127.0.0.1:5000")
+
+    raw_timeout = os.getenv("HEALTH_TIMEOUT_SECONDS", "30")
+    try:
+        health_timeout = float(raw_timeout)
+    except ValueError:
+        print(f"Invalid configuration: HEALTH_TIMEOUT_SECONDS={raw_timeout!r} is not a number.")
+        raise SystemExit(1)
+
+    if health_timeout <= 0:
+        print(f"Invalid configuration: HEALTH_TIMEOUT_SECONDS={health_timeout} must be greater than 0.")
+        raise SystemExit(1)
+
+    return server_url, health_timeout
 
 
 def stop_environment():
@@ -42,6 +56,8 @@ def verify_process(server_url):
 
 
 def main():
+    server_url, health_timeout = load_config()
+
     try:
         print("Stopping current environment...")
         stop_environment()
@@ -55,18 +71,18 @@ def main():
         print("RESET FAILED: could not run the 'docker' command. Is Docker installed and running?")
         return 1
 
-    print(f"Waiting for server at {SERVER_URL} to become healthy...")
-    if not wait_for_health(SERVER_URL, HEALTH_TIMEOUT_SECONDS):
+    print(f"Waiting for server at {server_url} to become healthy...")
+    if not wait_for_health(server_url, health_timeout):
         print("RESET FAILED: server never became healthy.")
         return 1
 
     try:
-        health_response = requests.get(f"{SERVER_URL}/health", timeout=3)
+        health_response = requests.get(f"{server_url}/health", timeout=3)
         if health_response.status_code != 200:
             print(f"RESET FAILED: /health returned status {health_response.status_code}.")
             return 1
 
-        if not verify_process(SERVER_URL):
+        if not verify_process(server_url):
             print("RESET FAILED: /process did not return the expected result for value=10.")
             return 1
 

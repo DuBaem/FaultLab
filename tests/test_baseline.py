@@ -1,3 +1,4 @@
+import os
 from unittest.mock import patch, MagicMock
 
 import pytest
@@ -64,6 +65,20 @@ def test_calculate_summary_empty_results():
     assert summary["latency_ms"]["mean"] is None
 
 
+def test_calculate_summary_all_failures():
+    results = [
+        {"success": False, "latency_ms": None},
+        {"success": False, "latency_ms": None},
+    ]
+    summary = baseline.calculate_summary(results)
+
+    assert summary["total_requests"] == 2
+    assert summary["successful_requests"] == 0
+    assert summary["failed_requests"] == 2
+    assert summary["success_rate"] == 0
+    assert summary["latency_ms"]["mean"] is None
+
+
 def test_run_request_marks_success_when_response_matches():
     response = make_response(200, {"request_id": "r1", "status": "success", "result": 20})
     with patch.object(baseline.requests, "post", return_value=response):
@@ -107,3 +122,49 @@ def test_run_request_records_timeout_instead_of_raising():
 
     assert result["success"] is False
     assert "timed out" in result["error"]
+
+
+# --- load_config ---
+
+def test_load_config_valid():
+    env = {
+        "SERVER_URL": "http://server",
+        "BASELINE_REQUESTS": "5",
+        "REQUEST_TIMEOUT_SECONDS": "2",
+        "HEALTH_TIMEOUT_SECONDS": "10",
+    }
+    with patch.dict(os.environ, env, clear=False):
+        server_url, baseline_requests, request_timeout, health_timeout = baseline.load_config()
+
+    assert server_url == "http://server"
+    assert baseline_requests == 5
+    assert request_timeout == 2.0
+    assert health_timeout == 10.0
+
+
+@pytest.mark.parametrize("raw_value", ["abc", "1.5"])
+def test_load_config_rejects_non_numeric_baseline_requests(raw_value):
+    with patch.dict(os.environ, {"BASELINE_REQUESTS": raw_value}, clear=False):
+        with pytest.raises(SystemExit):
+            baseline.load_config()
+
+
+@pytest.mark.parametrize("raw_value", ["0", "-1"])
+def test_load_config_rejects_non_positive_baseline_requests(raw_value):
+    with patch.dict(os.environ, {"BASELINE_REQUESTS": raw_value}, clear=False):
+        with pytest.raises(SystemExit):
+            baseline.load_config()
+
+
+@pytest.mark.parametrize("raw_value", ["0", "-1"])
+def test_load_config_rejects_non_positive_request_timeout(raw_value):
+    with patch.dict(os.environ, {"REQUEST_TIMEOUT_SECONDS": raw_value}, clear=False):
+        with pytest.raises(SystemExit):
+            baseline.load_config()
+
+
+@pytest.mark.parametrize("raw_value", ["0", "-1"])
+def test_load_config_rejects_non_positive_health_timeout(raw_value):
+    with patch.dict(os.environ, {"HEALTH_TIMEOUT_SECONDS": raw_value}, clear=False):
+        with pytest.raises(SystemExit):
+            baseline.load_config()

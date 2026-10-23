@@ -3,7 +3,7 @@
   "run_id": "run_001",
   "event_id": "evt_001",
   "sequence_number": 1,
-  "fault_type": "delay",
+  "fault_type": "delay", 
   "target": "server",
   "parameters": {
     "delay_ms": 1500

@@ -1,0 +1,68 @@
+
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FaultLab Fault Event",
+  "description": "Defines the structure of recorded fault events.",
+  "type": "object",
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "event_id": {
+      "type": "string"
+    },
+    "sequence_number": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "fault_type": {
+      "type": "string",
+      "enum": [
+        "delay",
+        "packet_loss",
+        "disconnect",
+        "reconnect",
+        "process_crash",
+        "process_restart"
+      ]
+    },
+    "target": {
+      "type": "string"
+    },
+    "parameters": {
+      "type": "object"
+    },
+    "scheduled_time_ms": {
+      "type": "number",
+      "minimum": 0
+    },
+    "actual_time_ms": {
+      "type": ["number", "null"],
+      "minimum": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "success",
+        "failed",
+        "skipped",
+        "unknown"
+      ]
+    },
+    "error_message": {
+      "type": ["string", "null"]
+    }
+  },
+  "required": [
+    "run_id",
+    "event_id",
+    "sequence_number",
+    "fault_type",
+    "target",
+    "parameters",
+    "scheduled_time_ms",
+    "actual_time_ms",
+    "status"
+  ],
+  "additionalProperties": false
+}

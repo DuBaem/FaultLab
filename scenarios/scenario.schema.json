@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://faultlab.local/schema/scenario-1.0.json",
+  "title": "FaultLab Scenario Version 1.0",
+  "description": "A bounded, local-only fault scenario. This schema validates data and does not execute commands.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "scenario_id",
+    "description",
+    "targets",
+    "actions",
+    "expected_outcomes",
+    "safety"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "scenario_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{2,63}$"
+    },
+    "description": { "type": "string", "minLength": 1, "maxLength": 240 },
+    "targets": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "service"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "service": { "const": "server" }
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": { "$ref": "#/$defs/action" }
+    },
+    "expected_outcomes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "safety": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "cleanup_required",
+        "max_total_duration_seconds"
+      ],
+      "properties": {
+        "scope": { "const": "local_docker_only" },
+        "cleanup_required": { "const": true },
+        "max_total_duration_seconds": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 300
+        }
+      }
+    }
+  },
+  "$defs": {
+    "action": {
+      "oneOf": [
+        { "$ref": "#/$defs/latencyAction" },
+        { "$ref": "#/$defs/packetLossAction" },
+        { "$ref": "#/$defs/disconnectAction" },
+        { "$ref": "#/$defs/processFailureAction" }
+      ]
+    },
+    "commonActionProperties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9_-]{2,63}$"
+      },
+      "target": { "type": "string", "minLength": 1 },
+      "start_after_seconds": { "type": "number", "minimum": 0, "maximum": 300 },
+      "duration_seconds": { "type": "number", "exclusiveMinimum": 0, "maximum": 300 }
+    },
+    "latencyAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "target", "start_after_seconds", "duration_seconds", "parameters"],
+      "properties": {
+        "id": { "$ref": "#/$defs/commonActionProperties/id" },
+        "type": { "const": "latency" },
+        "target": { "$ref": "#/$defs/commonActionProperties/target" },
+        "start_after_seconds": { "$ref": "#/$defs/commonActionProperties/start_after_seconds" },
+        "duration_seconds": { "$ref": "#/$defs/commonActionProperties/duration_seconds" },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["latency_ms"],
+          "properties": {
+            "latency_ms": { "type": "number", "minimum": 1, "maximum": 5000 },
+            "jitter_ms": { "type": "number", "minimum": 0, "maximum": 1000 }
+          }
+        }
+      }
+    },
+    "packetLossAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "target", "start_after_seconds", "duration_seconds", "parameters"],
+      "properties": {
+        "id": { "$ref": "#/$defs/commonActionProperties/id" },
+        "type": { "const": "packet_loss" },
+        "target": { "$ref": "#/$defs/commonActionProperties/target" },
+        "start_after_seconds": { "$ref": "#/$defs/commonActionProperties/start_after_seconds" },
+        "duration_seconds": { "$ref": "#/$defs/commonActionProperties/duration_seconds" },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["loss_percent"],
+          "properties": {
+            "loss_percent": { "type": "number", "minimum": 0.1, "maximum": 100 }
+          }
+        }
+      }
+    },
+    "disconnectAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "target", "start_after_seconds", "duration_seconds", "parameters"],
+      "properties": {
+        "id": { "$ref": "#/$defs/commonActionProperties/id" },
+        "type": { "const": "disconnect" },
+        "target": { "$ref": "#/$defs/commonActionProperties/target" },
+        "start_after_seconds": { "$ref": "#/$defs/commonActionProperties/start_after_seconds" },
+        "duration_seconds": { "$ref": "#/$defs/commonActionProperties/duration_seconds" },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["direction"],
+          "properties": {
+            "direction": { "const": "both" }
+          }
+        }
+      }
+    },
+    "processFailureAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "target", "start_after_seconds", "duration_seconds", "parameters"],
+      "properties": {
+        "id": { "$ref": "#/$defs/commonActionProperties/id" },
+        "type": { "const": "process_failure" },
+        "target": { "$ref": "#/$defs/commonActionProperties/target" },
+        "start_after_seconds": { "$ref": "#/$defs/commonActionProperties/start_after_seconds" },
+        "duration_seconds": { "$ref": "#/$defs/commonActionProperties/duration_seconds" },
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["signal"],
+          "properties": {
+            "signal": { "enum": ["SIGTERM", "SIGKILL"] },
+            "restart_after_seconds": { "type": "number", "minimum": 0, "maximum": 60 }
+          }
+        }
+      }
+    }
+  }
+}

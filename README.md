@@ -12,6 +12,8 @@ The project is designed to test how a client-server application behaves under co
 
 The initial client-server test environment is working.
 
+For a detailed reference of the server/client/baseline/reset contracts (request/response shapes, env vars, exit codes), see [docs/INTEGRATION.md](docs/INTEGRATION.md).
+
 ### Implemented
 
 - Python Flask server
@@ -23,13 +25,40 @@ The initial client-server test environment is working.
 - Docker Compose configuration
 - Shared Docker network between client and server
 - Successful client-to-server communication inside Docker
+- Repeatable baseline workload with timestamped JSON results
+- Container health check and verified reset workflow
+- Versioned scenario schema for four approved fault categories
+- Dry-run scenario validator with local-service allowlisting and bounded inputs
+- Live adapters for latency, packet loss, full network disconnection, and process failure
+- Timed scenario controller with guaranteed cleanup attempts
+- Run IDs, planned and observed timestamps, JSONL event logs, and summary bundles
+- Valid, invalid, and two-fault demonstration scenarios
+- Unit tests for validation, command construction, timing, and failure cleanup
 
 ### Successful Test
 
 - Health response: `{'status': 'healthy'}`
 - Process response: `{'request_id': 'req-001', 'result': 20, 'status': 'success'}`
 
-The fault injection, recording/replay, baseline automation, reset workflow, and comparison components are still under development.
+Recording/replay and original-versus-replay comparison remain under development. Live execution of latency, packet loss, disconnection, and process-failure scenarios was verified with Docker Desktop on October 23, 2026; the team should repeat the full sequence before the classroom demonstration.
+
+## Validate a Scenario
+
+The Report 1 prototype validates scenario structure and safety constraints without applying a fault.
+
+From the repository root, run:
+
+`python -m faultlab.scenario_validator scenarios/valid-latency.json`
+
+The valid example should report that one action was accepted and that no fault was executed.
+
+To inspect a clear validation failure, run:
+
+`python -m faultlab.scenario_validator scenarios/invalid-target.json`
+
+Run the validator and scenario-control tests with:
+
+`python -m unittest tests.test_scenario_validator tests.test_docker_cli tests.test_fault_adapters tests.test_controller -v`
 
 ## Current Architecture
 
@@ -110,6 +139,95 @@ Then clean up the containers and network with:
 
 `docker compose down`
 
+## Running the Baseline
+
+The baseline workload sends repeated `/process` requests to the server, times each one, checks that the response is actually correct (not just a 200 status), and saves simple summary statistics.
+
+The `baseline` service does not start with a normal `docker compose up`. It only runs when you ask for it:
+
+`docker compose run --rm baseline`
+
+This waits for the server's Docker healthcheck to pass, runs the configured number of requests, prints a short summary, and saves a results file.
+
+You can adjust the run with environment variables (defaults shown):
+
+- `BASELINE_REQUESTS=20`
+- `REQUEST_TIMEOUT_SECONDS=3`
+- `HEALTH_TIMEOUT_SECONDS=30`
+- `REQUEST_INTERVAL_SECONDS=0` (pause between requests; useful during fault demos)
+
+Example with a smaller run:
+
+`docker compose run --rm -e BASELINE_REQUESTS=5 baseline`
+
+### Where Results Are Saved
+
+Each run writes a timestamped JSON file to the `results/` folder on the host, e.g. `results/baseline_20261021T073133Z.json`. It contains the server URL, start/finish times, every individual request result, and the summary statistics (success rate, min/max/mean/median/standard deviation latency).
+
+These generated result files are not committed to the repository; only the `results/` folder itself is tracked.
+
+## Running the Reset Workflow
+
+`reset.py` returns the environment to a known-good state: it stops the current Compose environment, rebuilds a clean server, waits for it to become healthy, and checks `/health` and `/process` to confirm it behaves correctly.
+
+`python reset.py`
+
+A successful run prints `RESET PASSED` and exits with code `0`. A failed run prints `RESET FAILED` with a reason and exits with a non-zero code.
+
+Recreating the server removes any stale container-level network state. The reset then inspects the rebuilt interface and fails if a `netem` queue remains active.
+
+## Running Fault Scenarios
+
+The controller accepts JSON data only. Scenario files cannot contain shell commands, services are allowlisted, numeric values are bounded, and version 1.0 rejects overlapping actions so one cleanup cannot remove another action's fault.
+
+First build and start the server with the Linux `tc` utility and local `NET_ADMIN` capability:
+
+`docker compose up -d --build server`
+
+Check the complete two-fault schedule without changing Docker:
+
+`python -m faultlab.controller scenarios/demo-latency-packet-loss.json --dry-run`
+
+Run the live latency and packet-loss scenario:
+
+`python -m faultlab.controller scenarios/demo-latency-packet-loss.json`
+
+The controller stores each run under `results/experiments/<run-id>/`:
+
+- `scenario.json` is the exact validated scenario snapshot.
+- `events.jsonl` records run IDs, UTC timestamps, planned offsets, observed offsets, applications, and cleanup events.
+- `summary.json` records completion status, timing drift, and cleanup verification.
+
+Individual live examples are also available:
+
+- `scenarios/valid-latency.json`
+- `scenarios/valid-packet-loss.json`
+- `scenarios/valid-disconnect.json`
+- `scenarios/valid-process-failure.json`
+
+Always run `python reset.py` after an experiment. The controller also attempts immediate cleanup if an action or run fails.
+
+### Report 2 Demonstration Sequence
+
+1. Run a normal baseline: `docker compose run --rm baseline`.
+2. In one terminal, start a long workload: `docker compose run --rm -e BASELINE_REQUESTS=30 -e REQUEST_INTERVAL_SECONDS=0.5 -e REQUEST_TIMEOUT_SECONDS=1 baseline`.
+3. While that workload is running, use another terminal to run: `python -m faultlab.controller scenarios/demo-latency-packet-loss.json`.
+4. Run `python reset.py` and show `RESET PASSED`.
+5. Run another normal baseline to demonstrate recovery.
+
+This produces baseline result files plus a separate scenario event bundle. It implements the current integration path: **Baseline -> Inject -> Record -> Reset**.
+
+## Running the Tests
+
+Test dependencies (`pytest`) are kept separate from the runtime `requirements.txt`, in `requirements-dev.txt`.
+
+```
+pip install -r requirements-dev.txt
+pytest tests/
+```
+
+Most tests run without Docker at all, by checking the baseline logic directly (summary statistics, response validation, and failure handling). One test in `tests/test_integration.py` talks to a real server and is skipped automatically if nothing is running at `SERVER_URL`.
+
 ## Project Structure
 
 - `client/`
@@ -118,10 +236,47 @@ Then clean up the containers and network with:
 - `server/`
   - `server.py`
   - `Dockerfile`
+- `baseline/`
+  - `baseline.py`
+  - `Dockerfile`
+- `tests/`
+  - `conftest.py`
+  - `test_baseline.py`
+  - `test_client.py`
+  - `test_integration.py`
+  - `test_reset.py`
+  - `test_server.py`
+  - `test_scenario_validator.py`
+  - `test_fault_adapters.py`
+  - `test_docker_cli.py`
+  - `test_controller.py`
+- `results/`
+- `reset.py`
 - `compose.yaml`
+- `docs/INTEGRATION.md`
+- `docs/integration-contract.md`
+- `docs/tc-netem-research-notes.md`
+- `faultlab/`
+  - `controller.py`
+  - `docker_cli.py`
+  - `fault_adapters.py`
+  - `scenario_validator.py`
+- `scenarios/`
+  - `scenario.schema.json`
+  - `valid-latency.json`
+  - `valid-packet-loss.json`
+  - `valid-disconnect.json`
+  - `valid-process-failure.json`
+  - `demo-latency-packet-loss.json`
+  - `invalid-target.json`
 - `requirements.txt`
+- `requirements-dev.txt`
 - `README.md`
 - `.gitignore`
+
+## Development Assistance Disclosure
+
+The initial scenario-validation scaffold, examples, tests, and related README text were generated with OpenAI Codex on October 4, 2026. The fault adapters, controller, additional examples, and tests were AI-assisted with OpenAI Codex on October 22, 2026. Under the course policy, this material must be treated as AI-assisted work rather than an original student artifact. A student must personally review, modify, test, understand, and accurately document any portion retained in the project.
 
 ## Team Responsibilities
 
@@ -149,6 +304,8 @@ Current progress:
 - Server Docker image completed
 - Docker Compose environment completed
 - Docker client-to-server communication verified
+- Baseline measurements and timestamped result files completed
+- Reset and post-reset health verification completed
 
 ### Fidel Anyanwu
 
@@ -166,7 +323,19 @@ Primary responsibilities:
 - Scenario control
 - Fault cleanup and recovery
 
-The current Docker client/server environment is ready for initial fault-injection development.
+The fault-control component now builds on the shared Docker client/server environment.
+
+Current progress:
+
+- Bounded scenario schema and validator completed
+- Latency and packet-loss `tc/netem` adapters completed
+- Full Docker network disconnection/reconnection control completed
+- SIGTERM/SIGKILL process-failure control completed
+- Timed, non-overlapping scenario controller completed
+- Per-run scenario snapshots, event logs, and timing summaries completed
+- Cleanup verification and reset integration completed
+- Unit-test coverage for successful and interrupted runs completed
+- Live Docker verification completed for all four fault types; repeat verification is planned before the Report 2 demonstration
 
 Suggested branch: `fidel/fault-injection`
 
@@ -313,8 +482,3 @@ flowchart LR
 The client and server are both running in Docker containers and successfully communicating through the Docker network.
 
 This provides the shared test environment required for the next phase of FaultLab development.
-"""
-
-path = Path("/mnt/data/README.md")
-path.write_text(content, encoding="utf-8")
-print(f"Created {path}")

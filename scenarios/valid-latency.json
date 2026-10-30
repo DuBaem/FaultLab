@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "scenario_id": "server-latency-demo",
+  "description": "Add bounded latency to the local server during the sample workload.",
+  "targets": [
+    {
+      "name": "api-server",
+      "service": "server"
+    }
+  ],
+  "actions": [
+    {
+      "id": "delay-server",
+      "type": "latency",
+      "target": "api-server",
+      "start_after_seconds": 2,
+      "duration_seconds": 8,
+      "parameters": {
+        "latency_ms": 250,
+        "jitter_ms": 25
+      }
+    }
+  ],
+  "expected_outcomes": [
+    "Requests remain successful while observed response time increases.",
+    "The server returns to its baseline health state after cleanup."
+  ],
+  "safety": {
+    "scope": "local_docker_only",
+    "cleanup_required": true,
+    "max_total_duration_seconds": 30
+  }
+}

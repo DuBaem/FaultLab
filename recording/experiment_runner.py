@@ -20,15 +20,17 @@ def run_experiment(
     recovery_seconds=4.0,
     results_dir=Path("results/experiments"),
     dry_run=False,
+    observation_duration=None,
 ):
     """
     Run application requests concurrently with a fault scenario.
 
-    Continue observing for recovery_seconds after the controller
-    finishes, unless the request limit is reached first.
+    If observation_duration is provided, collect requests for
+    approximately that many seconds from workload start.
 
-    Save request observations and workload configuration in the
-    experiment's results directory.
+    Otherwise, use the legacy behavior: stop after the
+    controller finishes plus the recovery window, or when
+    the request limit is reached.
     """
 
     if request_count < 1:
@@ -39,6 +41,8 @@ def run_experiment(
         raise ValueError("request_timeout must be positive")
     if recovery_seconds < 0:
         raise ValueError("recovery_seconds cannot be negative")
+    if observation_duration is not None and observation_duration <= 0:
+        raise ValueError("observation_duration must be positive")
 
     results_dir = Path(results_dir)
 
@@ -59,10 +63,16 @@ def run_experiment(
                 if stop_signal.is_set():
                     break
 
-                request_id = f"request-{i:04d}"
-
-                started_at = datetime.now(timezone.utc).isoformat()
                 elapsed = time.perf_counter() - experiment_start
+
+                if (
+                    observation_duration is not None
+                    and elapsed >= observation_duration
+                ):
+                    break
+
+                request_id = f"request-{i:04d}"
+                started_at = datetime.now(timezone.utc).isoformat()
 
                 try:
                     result = run_request(
@@ -110,7 +120,12 @@ def run_experiment(
             time_scale=0 if dry_run else 1,
         )
 
-        workload_finished.wait(timeout=recovery_seconds)
+        if observation_duration is None:
+            workload_finished.wait(timeout=recovery_seconds)
+        else:
+            workload_finished.wait(
+                timeout=observation_duration + request_timeout + 1
+            )
 
     finally:
         stop_signal.set()
@@ -118,19 +133,18 @@ def run_experiment(
 
     run_dir = results_dir / summary["run_id"]
 
-    # Save individual application request observations.
     observation_path = save_observations(
         run_dir,
         observations,
     )
 
-    # Save workload settings for future experiment replay.
     workload_config = {
         "server_url": server_url,
         "request_count": request_count,
         "request_interval": request_interval,
         "request_timeout": request_timeout,
         "recovery_seconds": recovery_seconds,
+        "observation_duration": observation_duration,
         "input_value": 10,
     }
 

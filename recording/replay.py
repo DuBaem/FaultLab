@@ -99,6 +99,7 @@ def replay_experiment(
             request_interval=workload_config["request_interval"],
             request_timeout=workload_config["request_timeout"],
             recovery_seconds=workload_config["recovery_seconds"],
+            observation_duration=workload_config.get("observation_duration"),
             results_dir=results_dir,
             dry_run=dry_run,
         )

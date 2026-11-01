@@ -11,6 +11,79 @@ from recording.experiment_runner import run_experiment
 
 class TestExperimentRunner(unittest.TestCase):
 
+    
+    def test_fixed_observation_duration(self):
+        import json
+        import tempfile
+        import time
+        from pathlib import Path
+        from unittest.mock import patch
+
+        from recording.experiment_runner import run_experiment
+
+        with tempfile.TemporaryDirectory() as temp:
+            results_dir = Path(temp)
+
+            def fake_request(*args, **kwargs):
+                return {
+                    "request_id": args[1],
+                    "success": True,
+                    "latency_ms": 1.0,
+                }
+
+            def fake_controller(scenario, *, results_dir, **kwargs):
+                run_dir = Path(results_dir) / "fixed-window-test"
+                run_dir.mkdir(parents=True, exist_ok=True)
+
+                return {
+                    "run_id": "fixed-window-test",
+                    "status": "passed",
+                }
+
+            with (
+                patch(
+                    "recording.experiment_runner.run_request",
+                    side_effect=fake_request,
+                ),
+                patch(
+                    "recording.experiment_runner.execute_scenario",
+                    side_effect=fake_controller,
+                ),
+            ):
+                started = time.perf_counter()
+
+                result = run_experiment(
+                    scenario={},
+                    server_url="http://localhost:5000",
+                    request_count=100,
+                    request_interval=0.01,
+                    request_timeout=1.0,
+                    recovery_seconds=0,
+                    observation_duration=0.1,
+                    results_dir=results_dir,
+                    dry_run=True,
+                )
+
+                elapsed = time.perf_counter() - started
+
+            self.assertGreaterEqual(elapsed, 0.09)
+            self.assertLess(elapsed, 1.0)
+
+            self.assertGreater(result["request_count"], 0)
+            self.assertLess(result["request_count"], 100)
+
+            config = json.loads(
+                Path(result["workload_config_path"]).read_text(
+                    encoding="utf-8"
+                )
+            )
+
+            self.assertEqual(
+                config["observation_duration"],
+                0.1,
+            )
+
+
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.results_dir = Path(self.temp_dir.name)

@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 import pytest
 import requests
 
-import baseline
+import baseline.baseline as baseline
 
 
 def make_response(status_code, body):

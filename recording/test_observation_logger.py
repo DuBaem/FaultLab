@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from observation_logger import save_observations
+from recording.observation_logger import save_observations
 
 
 class TestObservationLogger(unittest.TestCase):

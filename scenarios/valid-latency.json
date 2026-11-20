@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "scenario_id": "server-latency-demo",
-  "description": "Add bounded latency to the local server during the sample workload.",
+  "description": "Delay packets leaving the server by 250 ms with 25 ms of jitter for eight seconds.",
   "targets": [
     {
       "name": "api-server",
@@ -22,8 +22,8 @@
     }
   ],
   "expected_outcomes": [
-    "Requests remain successful while observed response time increases.",
-    "The server returns to its baseline health state after cleanup."
+    "The client should still get the right answer, but it should take longer.",
+    "After cleanup, the server should answer the health check and requests should return to their usual timing."
   ],
   "safety": {
     "scope": "local_docker_only",

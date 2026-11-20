@@ -19,8 +19,7 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -r requirements-dev.txt
 
-      # The live integration test needs a real server, so it's run separately
-      # in the docker-smoke job instead of relying on it to skip itself here.
+      # The Docker job below starts a real server for the integration test.
       - name: Run unit tests
         run: >-
           python -m pytest
@@ -32,6 +31,7 @@ jobs:
           tests/test_docker_cli.py
           tests/test_fault_adapters.py
           tests/test_controller.py
+          tests/test_safety_check.py
           -v
 
   docker-smoke:
@@ -40,8 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # This job runs on its own clean runner, separate from unit-tests, so it
-      # needs its own Python setup before it can run pytest or client.py.
+      # Each job starts on a fresh runner and needs its own Python environment.
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -65,6 +64,17 @@ jobs:
 
       - name: Run a small containerized baseline workload
         run: docker compose run --rm --build -e BASELINE_REQUESTS=5 baseline
+
+      - name: Verify fault effects, cleanup, and recovery
+        run: python -m faultlab.safety_check --trials 1
+
+      - name: Save fault safety evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fault-safety-evidence
+          path: results/fault-safety/
+          if-no-files-found: ignore
 
       - name: Tear down Docker
         if: always()

@@ -24,7 +24,7 @@ def load_config():
 
 
 def stop_environment():
-    # Tear down whatever is currently running so the next build starts clean.
+    # Remove this project's containers and network before rebuilding the server.
     subprocess.run(["docker", "compose", "down"], check=True)
 
 
@@ -100,8 +100,7 @@ def main():
         print(f"RESET FAILED: {exc}")
         return 1
 
-    # Recreating the container removes any stale qdisc state. Verify that the
-    # rebuilt interface is clean instead of assuming the reset succeeded.
+    # A leftover delay or loss rule would affect the next person's baseline.
     if not verify_no_active_netem():
         print("RESET FAILED: an active tc/netem rule remains on the server interface.")
         return 1

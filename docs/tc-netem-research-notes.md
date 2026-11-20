@@ -1,87 +1,32 @@
-# `tc/netem` Research and Safe Prototype Notes
+# Why FaultLab delays packets at the server
 
-**Prepared:** October 22, 2026
+Prototype notes from October 22, 2026. The server doubles the value in each valid request. That gives us a simple way to tell whether slowing down its network changes the client's response time, whether a request fails altogether, and whether the same workload works again after cleanup.
 
-**Scope:** FaultLab local Docker fault injection
+## Why use Linux netem?
 
-AI-assistance disclosure: these notes were researched and drafted with OpenAI
-Codex on October 22, 2026. They are supporting research, not an original student
-artifact. Fidel must read the cited sources, verify the conclusions, revise the
-notes in his own words, and document the assistance before claiming research
-time or discussing the material in a report meeting.
+The proposal calls for network delay and packet loss. Linux already provides both through `netem`, a queue that changes how packets leave an interface [1]. Hemminger describes using network emulation to study such conditions without a physical wide-area network [3]. For FaultLab, putting the rule on the test server's `eth0` lets us use the same client, server, and request before and during an experiment.
 
-## Research Question
+There are two different measurements here. The scenario specifies what the queue should do to an outgoing packet. The client measures how long it takes to get an answer. TCP behavior and Linux timer resolution can affect that time [1]. Jurgelionis and colleagues found that delay and uncorrelated loss generally followed the configured settings in their tests, while the variation in delay could be smaller than requested [2]. That's why jitter is optional in our scenario and why the controller records planned and observed times separately.
 
-How can FaultLab apply repeatable latency, packet-loss, disconnection, and
-process faults to a Docker client/server system while limiting privileges and
-guaranteeing a recoverable state?
+## How the design limits each fault
 
-## Findings
+| Design choice | Why it matters for FaultLab |
+| --- | --- |
+| Give the local server the additional `NET_ADMIN` capability through Compose's `cap_add` [4]. | The server can use traffic control on its own interface. The other services keep their usual permissions. |
+| Accept only the local Compose `server` and validate scenario values before building Docker arguments. | A scenario file can name an approved fault and its settings. It has no field for a shell command or executable. |
+| Limit delay to 1–5,000 ms, jitter to 0–1,000 ms, and loss to 0.1–100%. | The validator rejects values outside the experiment's supported range. |
+| Bound the total duration and run one action at a time. | The controller has time to remove one rule before another action needs the same interface. |
+| After a network fault, remove the queue and inspect `eth0`. | A successful cleanup should leave no active `netem` rule. |
 
-Linux `netem` is a queue discipline used to emulate network properties on live
-packets. Its supported controls include delay, jitter, random loss,
-corruption, duplication, and reordering [1]. FaultLab version 1.0 uses only
-delay and random loss because those are the two network faults committed to in
-the formal proposal and Gantt chart.
+A full disconnect is a different experiment. Docker lets the controller detach the server from its networks, then reconnect it with its service name [5], [6]. For a process fault, the controller sends the allowed `SIGTERM` or `SIGKILL` signal, waits for the scenario duration, then starts the service and checks its state. Both cases can look like an outage to the client. Their cleanup steps differ because one removes a route and the other stops a process.
 
-The selected commands operate on traffic leaving the server's `eth0`
-interface. Applying the rule to the server is useful for this client/server
-prototype because delayed or dropped responses are directly visible to the
-baseline workload. The Linux documentation warns that timer granularity and
-TCP queue behavior can affect measured results [1]. Therefore, the scenario
-file describes the requested impairment, while the experiment output records
-the observed timing rather than claiming that configured and measured values
-are identical.
+## What still needs a live check
 
-An empirical evaluation by Jurgelionis et al. found that NetEm generally
-matched expected delay and uncorrelated packet-loss behavior, but realized
-jitter could be lower than the configured input [2]. This influenced two
-FaultLab choices: jitter is optional, and the event bundle stores planned and
-observed times for later comparison. Hemminger's earlier NetEm work also
-motivates using network emulation to expose applications to realistic delay
-and loss without requiring a physical wide-area test network [3].
+A unit test can check that the controller schedules the right action and attempts cleanup. To see what a client actually experiences, run the workload in Docker and inspect the requests before, during, and after the fault. The reset script provides a separate check by rebuilding the server, testing both endpoints, and checking the queue.
 
-Changing a container's traffic-control configuration requires a Linux network
-administration capability. Docker Compose supports adding a specific
-capability with `cap_add` [4]. FaultLab grants only `NET_ADMIN` to the local
-server container instead of using a privileged container or adding all
-capabilities. Scenario values remain data: they are validated and passed as
-separate subprocess arguments, and scenario files cannot supply commands.
+Results depend on where the rule is applied, how TCP responds, and how Docker Desktop schedules work on the host. Partial packet loss also varies from run to run. Keep the settings with the measurements when comparing trials. For a later example, see the [November 20 results](fidel-progress-2026-11-20.md).
 
-For a complete temporary disconnection, Docker provides explicit network
-disconnect and connect operations [5], [6]. FaultLab records the server's
-attached network names before isolation and restores the Compose service-name
-alias during reconnection. Process failure is handled separately by sending an
-allowlisted `SIGTERM` or `SIGKILL`, waiting for the declared duration, starting
-the service, and waiting for its health state.
-
-## Safety Decisions Applied to the Prototype
-
-1. Only the local, long-running Compose `server` is accepted as a version 1.0
-   fault target.
-2. Raw shell commands and arbitrary executable names are rejected.
-3. Latency is limited to 1-5000 ms; jitter is limited to 0-1000 ms.
-4. Packet loss is limited to 0.1-100 percent.
-5. Each action and the complete scenario have bounded durations.
-6. Version 1.0 rejects overlapping faults so cleanup is deterministic.
-7. Every successful application receives a matching cleanup attempt.
-8. Network cleanup runs `tc qdisc del` and then checks that `netem` is absent.
-9. Process cleanup restarts the service and waits for a healthy/running state.
-10. `reset.py` recreates the server and independently verifies health,
-    processing behavior, and absence of an active `netem` qdisc.
-
-## Limitations and Next Evaluation
-
-- NetEm affects egress traffic on the selected interface; results should not be
-  generalized to every possible ingress or router placement.
-- Docker Desktop adds a virtualization layer on Windows, so observed timing may
-  include host scheduling and virtualization effects.
-- Random packet loss will vary between runs unless a supported deterministic
-  seed strategy is added and evaluated.
-- Unit tests verify validation, command construction, scheduling, event output,
-  and cleanup paths. A live Docker run is still required to measure actual
-  latency, request failures, and post-reset recovery on the demonstration
-  machine.
+OpenAI Codex helped research and draft these notes on October 22 and edit the wording on November 20. They are supporting material. For the course, personal research credit requires reading the sources, verifying the conclusions, revising the notes, and documenting that assistance.
 
 ## References
 

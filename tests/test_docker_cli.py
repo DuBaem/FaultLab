@@ -7,7 +7,7 @@ import unittest
 from collections import deque
 from pathlib import Path
 
-from faultlab.docker_cli import DockerCompose
+from faultlab.docker_cli import DockerCompose, NetworkAttachment
 
 
 class RecordingRunner:
@@ -94,6 +94,49 @@ class DockerComposeTests(unittest.TestCase):
             ["docker", "compose", "up", "-d", "--no-deps", "server"],
             runner.calls[1][0],
         )
+
+    def test_commands_have_a_timeout_and_report_timeouts_clearly(self) -> None:
+        def stalled(command, **kwargs):
+            self.assertEqual(30, kwargs["timeout"])
+            raise subprocess.TimeoutExpired(command, kwargs["timeout"])
+
+        with self.assertRaisesRegex(RuntimeError, "timed out"):
+            DockerCompose(runner=stalled).exec("server", ["tc", "qdisc", "show"])
+
+    def test_invalid_command_timeouts_are_rejected(self) -> None:
+        for timeout in (0, -1, float("inf"), float("nan")):
+            with self.subTest(timeout=timeout):
+                with self.assertRaises(ValueError):
+                    DockerCompose(command_timeout_seconds=timeout)
+
+    def test_interrupted_disconnect_restores_every_original_network(self) -> None:
+        calls = []
+
+        def interrupted(command, **kwargs):
+            calls.append(command)
+            if "ps" in command:
+                return subprocess.CompletedProcess(command, 0, "container-1", "")
+            if "inspect" in command:
+                return subprocess.CompletedProcess(command, 0, "first\nsecond\n", "")
+            if command[1:4] == ["network", "disconnect", "second"]:
+                raise KeyboardInterrupt()
+            return subprocess.CompletedProcess(command, 0, "", "")
+
+        with self.assertRaises(KeyboardInterrupt):
+            DockerCompose(runner=interrupted).disconnect("server")
+        for network in ("first", "second"):
+            self.assertIn(["docker", "network", "connect", "--alias", "server",
+                           network, "container-1"], calls)
+
+    def test_reconnect_attempts_other_networks_after_one_fails(self) -> None:
+        runner = RecordingRunner([
+            subprocess.CompletedProcess([], 1, "", "network unavailable"),
+            subprocess.CompletedProcess([], 0, "", ""),
+        ])
+        with self.assertRaisesRegex(RuntimeError, "network unavailable"):
+            DockerCompose(runner=runner).reconnect(
+                NetworkAttachment("container-1", "server", ("first", "second")))
+        self.assertEqual(2, len(runner.calls))
 
 
 if __name__ == "__main__":

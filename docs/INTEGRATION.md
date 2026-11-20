@@ -1,136 +1,75 @@
-# FaultLab Integration Reference
+# How the client, server, baseline, and reset fit together
 
-This document describes the **current implemented behavior** of FaultLab's Docker/client/server/baseline/reset foundation, as it exists in the code today. It is not a design spec and nothing here is frozen — it describes what the system currently does, and it will change as the team integrates fault injection and recording/replay.
+Use this page when you're connecting another component to the server or trying to explain a run that finished with failed requests. The [scenario and event contract](integration-contract.md) covers the controller's side of the same experiment.
 
-For anything involving Fidel's or Chidera's components, this document intentionally does not propose names, fields, APIs, or schemas (see "Team Decision Required" at the end).
+## What the server returns
 
-## Current Implemented Interfaces
+`GET /health` returns HTTP 200 and `{"status":"healthy"}` when the Flask handler can answer. To check that the server can also do its job, send a request to `POST /process`:
 
-### `GET /health`
-
-**Purpose:** a liveness/readiness check — confirms the server process is running and able to respond.
-
-**Response:** always `200`, body:
-```json
-{"status": "healthy"}
-```
-There is currently no unhealthy response from this endpoint — if the process can respond at all, it reports healthy.
-
-### `POST /process`
-
-**Request shape:**
 ```json
 {"request_id": "req-001", "value": 10}
 ```
-`request_id` can be any JSON value that round-trips (the server just echoes it back); `value` must be numeric.
 
-**Successful response** (`200`):
+A successful response has HTTP status 200. The server echoes the ID and doubles the number:
+
 ```json
 {"request_id": "req-001", "status": "success", "result": 20}
 ```
-The server currently doubles `value` (`result = value * 2`).
 
-**Current `400` error cases**, all returning `{"status": "error", "message": "..."}` as plain JSON (never an HTML error page, and never an unhandled 500 for these cases):
-- The request body is missing, empty, malformed JSON, or valid JSON that isn't an object (e.g. `null`) → `"a JSON object body is required"`.
-- `request_id` or `value` is missing → `"request_id and value are required"`.
-- `value` is present but not numeric → `"value must be a number"`.
+The ID can be any non-null JSON value. The server accepts integers and decimals for `value`. It rejects booleans so that sending `true` by mistake won't produce the number 2. For HTTP 400, look at the `message` field alongside `"status": "error"`:
 
-**`value` must be numeric, and `bool` is explicitly rejected.** In Python, `bool` is technically a subclass of `int`, so `True`/`False` would otherwise silently be accepted as valid numbers (and double to `2`/`0`). The server explicitly checks for this and returns the same `"value must be a number"` error for a boolean `value`.
+| What the server received | Message |
+| --- | --- |
+| Empty body, malformed JSON, or a JSON value other than an object | `a JSON object body is required` |
+| Missing or null `request_id` or `value` | `request_id and value are required` |
+| A nonnumeric `value`, including a boolean | `value must be a number` |
 
-### `client/client.py`
+## Which check should I run?
 
-**What it does:** a simple, one-shot demonstration client. It calls `/health`, then calls `/process` once with a fixed test value, and reports pass/fail for each.
+| Program | What it checks | What exit code 0 tells you |
+| --- | --- | --- |
+| [Client](../client/client.py) | Calls `/health` once and sends one known value to `/process`. Checks HTTP status, the health message, the echoed ID, the success flag, and the doubled value. | Both checks passed. The client exits with 1 if either fails. |
+| [Baseline](../baseline/baseline.py) | Waits for HTTP 200 from `/health`, then sends a series of timed `/process` requests and checks their answers. | The workload finished and saved a file. Check the success count inside it to see how many requests passed. |
+| [Reset](../reset.py) | Takes down this Compose stack, rebuilds the server, checks health and processing, then inspects the server's traffic-control rules. | Reset printed `RESET PASSED`. The server answered correctly and the interface check found no active `netem` rule. |
 
-**Configuration (environment variables):**
-- `SERVER_URL` — default `http://127.0.0.1:5000`.
-- `REQUEST_TIMEOUT_SECONDS` — default `5`. Must be a number greater than `0`. An invalid value (non-numeric, zero, or negative) prints a clear `Invalid configuration: ...` message and exits immediately with code `1`, before any network call is made.
+The client tries each endpoint once. The baseline continues after an individual request fails so that you can see when failures start and when the service recovers. If the baseline times out waiting for a healthy server, it exits with 1 before sending the workload.
 
-**Health validation:** `check_health()` only reports success if *all* of the following hold — the request completes without a connection/timeout error, the HTTP status is `200`, the body parses as JSON, and the body is `{"status": "healthy"}`. A `200` with an unexpected or unparseable body is treated as a failure, not a pass.
+## Settings
 
-**Process-response validation:** `run_process()` only reports success if the request completes, the status is `200`, the body parses as JSON, the returned `request_id` matches what was sent, `status == "success"`, and `result` equals the expected value. Any mismatch is reported as a failure with a descriptive message, never a crash.
+| Variable | Used by | Default and meaning |
+| --- | --- | --- |
+| `SERVER_URL` | Client, baseline, reset | Defaults to `http://127.0.0.1:5000` on the host. Compose sets `http://server:5000` for the client and baseline containers. |
+| `BASELINE_REQUESTS` | Baseline | 20 requests. Choose a whole number of at least 1. |
+| `REQUEST_TIMEOUT_SECONDS` | Client, baseline | 5 seconds for the client, 3 for the baseline. Choose a positive value. |
+| `HEALTH_TIMEOUT_SECONDS` | Baseline, reset | 30 seconds to wait for the server. Choose a positive value. |
+| `REQUEST_INTERVAL_SECONDS` | Baseline | 0 seconds between requests. Increase it to spread a workload across a fault. |
+| `RESULTS_DIR` | Baseline | Defaults to `results` relative to the working directory. Compose mounts the container's `/app/results` at `./results` on the host. |
 
-**Exit codes:** `0` if both the health check and the process check pass; `1` if either fails, or if configuration is invalid.
+Each program checks its numeric settings before starting its work. For example, setting `BASELINE_REQUESTS=0` reports an invalid configuration and exits with 1. To run a small baseline with a valid setting, use `docker compose run --rm -e BASELINE_REQUESTS=5 baseline`.
 
-**No retries or automatic recovery.** Each check is attempted exactly once. There is no retry loop, no reconnect behavior, and no self-healing — a failure is reported immediately as a failure.
+## Reading a baseline file
 
-### `baseline/baseline.py`
+Look for `results/baseline_<UTC timestamp>.json`. The top level records `server_url`, `requests_requested`, `started_at`, `finished_at`, `results`, and `summary`. Start with `summary`, then look up a request in `results` if you need to explain a failure.
 
-**Purpose:** sends a configurable number of `/process` requests to the server, measures latency per request, validates each response the same way the client does, and saves aggregate statistics to a JSON file. Used to characterize normal (fault-free) system behavior for later comparison.
+| Field | How to use it |
+| --- | --- |
+| `total_requests`, `successful_requests`, `failed_requests`, `success_rate` under `summary` | Read the counts together. The rate is a percentage from 0 to 100. |
+| `summary.latency_ms` | Gives the minimum, maximum, mean, median, and sample standard deviation for successful requests. With no successes these values are null. `stddev` needs two successful timings. |
+| `request_id`, `input_value`, `expected_result`, `observed_result` | Match a single request to its answer. |
+| `http_status`, `success`, `latency_ms`, `error` | Distinguish a wrong answer from a timeout. A timeout can leave the HTTP status and elapsed time null. |
 
-**Configuration (environment variables), loaded by `load_config()`:**
-- `SERVER_URL` — default `http://127.0.0.1:5000`.
-- `BASELINE_REQUESTS` — default `20`. Must be an integer `>= 1`.
-- `REQUEST_TIMEOUT_SECONDS` — default `3`. Must be a number `> 0`.
-- `HEALTH_TIMEOUT_SECONDS` — default `30`. Must be a number `> 0`.
-- `REQUEST_INTERVAL_SECONDS` — default `0`. Must be a number `>= 0`. A positive value pauses between requests so a fault can be observed during a longer baseline run.
+## What Docker starts
 
-**Validation:** any invalid value (non-numeric, or out of the ranges above) prints a clear `Invalid configuration: ...` message and exits with code `1` before the server is ever contacted.
+The [Compose file](../compose.yaml) defines three services. The Flask `server` publishes port 5000 and adds `NET_ADMIN` so the controller can change traffic rules inside that container. Its health check calls `/health` using Python every five seconds, with a three-second timeout, five retries, and a five-second start period.
 
-**Output file location:** `results/baseline_<UTC timestamp>.json` (e.g. `results/baseline_20261021T073133Z.json`), relative to the current working directory — this is `results/` under `/app` inside the `baseline` container, which the Compose file mounts to `./results` on the host.
+The `client` runs once after the server is healthy. The `baseline` service waits for the same health check but has its own Compose profile. Start it explicitly with `docker compose run --rm --build baseline`. Both services use Docker's DNS to reach `server` on the default Compose network.
 
-**Current baseline JSON fields:**
-```json
-{
-  "server_url": "...",
-  "requests_requested": 20,
-  "started_at": "ISO-8601 UTC timestamp",
-  "finished_at": "ISO-8601 UTC timestamp",
-  "results": [
-    {
-      "request_id": "baseline-0000",
-      "input_value": 10,
-      "expected_result": 20,
-      "observed_result": 20,
-      "http_status": 200,
-      "success": true,
-      "latency_ms": 12.3,
-      "error": null
-    }
-  ],
-  "summary": {
-    "total_requests": 20,
-    "successful_requests": 20,
-    "failed_requests": 0,
-    "success_rate": 100.0,
-    "latency_ms": {"min": 0.0, "max": 0.0, "mean": 0.0, "median": 0.0, "stddev": null}
-  }
-}
-```
-`success_rate` is a percentage (`0`-`100`). `stddev` is `null` unless there are at least two successful latency measurements.
+## What reset verifies
 
-**Success/failure behavior and exit codes:** if the server never becomes healthy within `HEALTH_TIMEOUT_SECONDS`, the script prints a message and exits with code `1` without sending any `/process` requests. Otherwise, it always runs the full configured number of requests — individual request failures are recorded in the results file (`success: false`, with an `error` message) but do **not** stop the run or change the exit code. A clean exit code `0` means the run completed and a results file was written; it does **not** by itself mean every request succeeded — that must be read from the `summary` in the results file.
+Run `python reset.py` from the repository root. It runs `docker compose down`, then `docker compose up -d --build server`. After the new server answers its health check, reset makes a fresh `GET /health` and sends `{"request_id":"reset-check","value":10}` to `/process`. It expects HTTP 200 and a result of 20. Finally, it inspects `eth0` for a leftover `netem` queue.
 
-### `reset.py`
+If you see `RESET FAILED`, read the reason on that line. It identifies the step to investigate, such as a Docker error, a health timeout, an unexpected answer, or a failed queue check. A successful reset leaves the server running so the next person can take a fresh baseline.
 
-**What it currently resets:** the container-level environment only. It runs `docker compose down` (stopping and removing all current containers/network), then `docker compose up -d --build server` (rebuilding and starting a clean `server` container from current source), then verifies the new server is healthy and behaves correctly.
+## Decisions for recorder and replay integration
 
-**Fault-state cleanup:** recreating the server removes container-level `tc`/`netem` state. The reset then runs `tc qdisc show dev eth0` in the rebuilt server and fails if an active `netem` queue remains. It does not restart one-shot `client` or `baseline` containers.
-
-**Configuration:** `HEALTH_TIMEOUT_SECONDS` (default `30`, must be a number `> 0`) and `SERVER_URL` (default `http://127.0.0.1:5000`), loaded by `load_config()`. An invalid `HEALTH_TIMEOUT_SECONDS` prints a clear message and exits with code `1` before any Docker command runs.
-
-**`RESET PASSED` / `RESET FAILED` behavior:** the script prints exactly one of these two lines near the end of its run. `RESET FAILED` is always followed by a short reason on the same or a preceding line (e.g. which Docker command failed and its exit status, that the server never became healthy, or that the final verification request failed).
-
-**Health and `/process` verification:** after rebuilding the server and confirming it passes `wait_for_health`, `reset.py` makes its own direct `GET /health` call (expects `200`) and a `POST /process` call with `{"request_id": "reset-check", "value": 10}` (expects `200` and `result == 20`) before declaring success.
-
-**Exit codes:** `0` on `RESET PASSED`. `1` on any failure path — a failed `docker compose` command (including Docker not being installed/running), the server never becoming healthy, either verification request failing, or an active `netem` queue remaining after recreation.
-
-### Docker / Compose
-
-**Current services** (exactly as defined in `compose.yaml`): `server`, `client`, `baseline`.
-
-- **`server`** — builds from `server/Dockerfile`, includes the Linux `tc` utility, receives only the local `NET_ADMIN` capability required for network-fault experiments, and is published on host port `5000` (`5000:5000`). Its Docker healthcheck runs `python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/health', timeout=2)"` every 5 seconds (3-second timeout, 5 retries, 5-second start period).
-- **`client`** — builds from `client/Dockerfile`, `SERVER_URL=http://server:5000`, `depends_on: server` with `condition: service_healthy` (waits for the healthcheck, not just container start).
-- **`baseline`** — builds from `baseline/Dockerfile`, `SERVER_URL=http://server:5000`, same `depends_on: service_healthy`, mounts `./results:/app/results`, and is gated behind `profiles: [baseline]` — **it is currently still profile-based and does not start on a plain `docker compose up`.** It's run explicitly, e.g. `docker compose run --rm baseline` (optionally with `--build` to guarantee the current source is used).
-
-**Network behavior:** inside Compose's network, services reach the server at `http://server:5000` — `server` is the Compose service name, resolved via Docker's internal DNS. There is no other network configuration (no custom networks, no exposed ports beyond `5000` on `server`).
-
-## Team Decision Required
-
-The foundation contracts above remain unchanged. An initial version of the scenario schema, controller interface, fault cleanup, run identity, timestamps, and experiment-bundle structure is now implemented and documented in [integration-contract.md](integration-contract.md).
-
-The team must still review that version with the recording/replay component and agree on:
-
-- Any observation fields added by the recorder.
-- Replay input and comparison formats.
-- Final orchestration across baseline, injection, recording, reset, replay, and comparison.
-- Any versioned interface changes discovered during integration.
+When integrating the recorder, agree on which observations belong to each run, how replay reads the saved input, and how the comparison pairs up results. Use the controller's existing run ID and event fields to link the records. If a field needs to change, update the contract together before merging the code that reads it.

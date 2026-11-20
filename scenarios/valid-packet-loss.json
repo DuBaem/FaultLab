@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "scenario_id": "server-packet-loss-demo",
-  "description": "Apply bounded packet loss to the local server, then verify automatic cleanup.",
+  "description": "Drop 25% of outgoing server packets for six seconds, then clear the rule.",
   "targets": [
     {
       "name": "api-server",
@@ -21,8 +21,8 @@
     }
   ],
   "expected_outcomes": [
-    "Some workload requests fail or time out while packet loss is active.",
-    "The server network queue returns to its normal state after cleanup."
+    "Some requests may take longer or time out while the server drops packets.",
+    "After cleanup, the server's network interface should have no active loss rule."
   ],
   "safety": {
     "scope": "local_docker_only",

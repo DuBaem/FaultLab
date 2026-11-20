@@ -1,0 +1,2542 @@
+{
+  "started_at": "2026-11-20T16:18:21.234445+00:00",
+  "scope": "local Docker fault safety; not replay reproducibility",
+  "trials_per_fault": 2,
+  "trials": [
+    {
+      "trial": 1,
+      "fault_type": "latency",
+      "run_id": "qa-latency-20261120T161824Z-48458a3a",
+      "before": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 15.497901000003367,
+            "error": null,
+            "started_at": "2026-11-20T16:18:23.541423+00:00",
+            "finished_at": "2026-11-20T16:18:23.557119+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.397791999996571,
+            "error": null,
+            "started_at": "2026-11-20T16:18:23.607469+00:00",
+            "finished_at": "2026-11-20T16:18:23.612998+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.735575000016979,
+            "error": null,
+            "started_at": "2026-11-20T16:18:23.663187+00:00",
+            "finished_at": "2026-11-20T16:18:23.669027+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 3.5376459999838517,
+            "error": null,
+            "started_at": "2026-11-20T16:18:23.719202+00:00",
+            "finished_at": "2026-11-20T16:18:23.722842+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.613743000002614,
+            "error": null,
+            "started_at": "2026-11-20T16:18:23.772992+00:00",
+            "finished_at": "2026-11-20T16:18:23.779771+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.7626199999845085,
+            "error": null,
+            "started_at": "2026-11-20T16:18:23.830025+00:00",
+            "finished_at": "2026-11-20T16:18:23.835917+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.465887999979714,
+            "error": null,
+            "started_at": "2026-11-20T16:18:23.886102+00:00",
+            "finished_at": "2026-11-20T16:18:23.892697+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.187935000014022,
+            "error": null,
+            "started_at": "2026-11-20T16:18:23.943010+00:00",
+            "finished_at": "2026-11-20T16:18:23.949307+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 3.5376459999838517,
+            "max": 15.497901000003367,
+            "mean": 6.899887499997703,
+            "median": 5.975277499999265,
+            "stddev": 3.6038254775633436
+          }
+        }
+      },
+      "during": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 516.414176000012,
+            "error": null,
+            "started_at": "2026-11-20T16:18:24.721685+00:00",
+            "finished_at": "2026-11-20T16:18:25.238339+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 519.0180370000235,
+            "error": null,
+            "started_at": "2026-11-20T16:18:25.288695+00:00",
+            "finished_at": "2026-11-20T16:18:25.807873+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 517.0159109999872,
+            "error": null,
+            "started_at": "2026-11-20T16:18:25.858092+00:00",
+            "finished_at": "2026-11-20T16:18:26.375276+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 3,
+          "successful_requests": 3,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 516.414176000012,
+            "max": 519.0180370000235,
+            "mean": 517.4827080000076,
+            "median": 517.0159109999872,
+            "stddev": 1.3632489157399394
+          }
+        }
+      },
+      "after": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 44.566785000029085,
+            "error": null,
+            "started_at": "2026-11-20T16:18:36.630630+00:00",
+            "finished_at": "2026-11-20T16:18:36.675394+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.739970000012363,
+            "error": null,
+            "started_at": "2026-11-20T16:18:36.725648+00:00",
+            "finished_at": "2026-11-20T16:18:36.732523+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.619544999978189,
+            "error": null,
+            "started_at": "2026-11-20T16:18:36.782779+00:00",
+            "finished_at": "2026-11-20T16:18:36.789519+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.02363699996522,
+            "error": null,
+            "started_at": "2026-11-20T16:18:36.839729+00:00",
+            "finished_at": "2026-11-20T16:18:36.844870+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.698093000034987,
+            "error": null,
+            "started_at": "2026-11-20T16:18:36.895232+00:00",
+            "finished_at": "2026-11-20T16:18:36.901056+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.676242999982151,
+            "error": null,
+            "started_at": "2026-11-20T16:18:36.951274+00:00",
+            "finished_at": "2026-11-20T16:18:36.957067+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.042389999995066,
+            "error": null,
+            "started_at": "2026-11-20T16:18:37.007258+00:00",
+            "finished_at": "2026-11-20T16:18:37.011401+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.049292999980025,
+            "error": null,
+            "started_at": "2026-11-20T16:18:37.061554+00:00",
+            "finished_at": "2026-11-20T16:18:37.065699+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 4.042389999995066,
+            "max": 44.566785000029085,
+            "mean": 10.301994499997136,
+            "median": 5.687168000008569,
+            "stddev": 13.882454441662846
+          }
+        }
+      },
+      "evaluation": {
+        "passed": true,
+        "checks": {
+          "baseline_success": true,
+          "during_samples_inside_fault": true,
+          "fault_effect_observed": true,
+          "controller_passed": true,
+          "cleanup_verified": true,
+          "service_state_restored": true,
+          "recovery_success": true
+        },
+        "baseline_mean_ms": 6.899887499997703,
+        "during_success_mean_ms": 517.4827080000076,
+        "during_failures": 0,
+        "during_sample_count": 3,
+        "recovery_successes": 8,
+        "recovery_requests": 8
+      }
+    },
+    {
+      "trial": 1,
+      "fault_type": "packet_loss",
+      "run_id": "qa-packet-loss-20261120T161838Z-59abe4fe",
+      "before": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.492192999985491,
+            "error": null,
+            "started_at": "2026-11-20T16:18:37.722742+00:00",
+            "finished_at": "2026-11-20T16:18:37.729359+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.287475000021914,
+            "error": null,
+            "started_at": "2026-11-20T16:18:37.779565+00:00",
+            "finished_at": "2026-11-20T16:18:37.786029+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 8.871852999959629,
+            "error": null,
+            "started_at": "2026-11-20T16:18:37.836208+00:00",
+            "finished_at": "2026-11-20T16:18:37.845206+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.748685999970803,
+            "error": null,
+            "started_at": "2026-11-20T16:18:37.895397+00:00",
+            "finished_at": "2026-11-20T16:18:37.900242+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.8935510000187605,
+            "error": null,
+            "started_at": "2026-11-20T16:18:37.950477+00:00",
+            "finished_at": "2026-11-20T16:18:37.957515+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.097131000013633,
+            "error": null,
+            "started_at": "2026-11-20T16:18:38.007735+00:00",
+            "finished_at": "2026-11-20T16:18:38.012975+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.052445000046646,
+            "error": null,
+            "started_at": "2026-11-20T16:18:38.053058+00:00",
+            "finished_at": "2026-11-20T16:18:38.058260+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.828233000045202,
+            "error": null,
+            "started_at": "2026-11-20T16:18:38.108451+00:00",
+            "finished_at": "2026-11-20T16:18:38.114424+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 4.748685999970803,
+            "max": 8.871852999959629,
+            "mean": 6.15894587500776,
+            "median": 6.057854000033558,
+            "stddev": 1.3350806330086598
+          }
+        }
+      },
+      "during": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by ConnectTimeoutError(<HTTPConnection(host='server', port=5000) at 0x755931ff86e0>, 'Connection to server timed out. (connect timeout=1.0)'))",
+            "started_at": "2026-11-20T16:18:39.280732+00:00",
+            "finished_at": "2026-11-20T16:18:40.286567+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by ConnectTimeoutError(<HTTPConnection(host='server', port=5000) at 0x755931736930>, 'Connection to server timed out. (connect timeout=1.0)'))",
+            "started_at": "2026-11-20T16:18:40.336888+00:00",
+            "finished_at": "2026-11-20T16:18:41.344467+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by ConnectTimeoutError(<HTTPConnection(host='server', port=5000) at 0x7559317370b0>, 'Connection to server timed out. (connect timeout=1.0)'))",
+            "started_at": "2026-11-20T16:18:41.394657+00:00",
+            "finished_at": "2026-11-20T16:18:42.398682+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 3,
+          "successful_requests": 0,
+          "failed_requests": 3,
+          "success_rate": 0.0,
+          "latency_ms": {
+            "min": null,
+            "max": null,
+            "mean": null,
+            "median": null,
+            "stddev": null
+          }
+        }
+      },
+      "after": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 16.986733999999615,
+            "error": null,
+            "started_at": "2026-11-20T16:18:49.403884+00:00",
+            "finished_at": "2026-11-20T16:18:49.421086+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 7.024817999990773,
+            "error": null,
+            "started_at": "2026-11-20T16:18:49.471315+00:00",
+            "finished_at": "2026-11-20T16:18:49.478501+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.853737999984787,
+            "error": null,
+            "started_at": "2026-11-20T16:18:49.528683+00:00",
+            "finished_at": "2026-11-20T16:18:49.534678+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.5933410000079675,
+            "error": null,
+            "started_at": "2026-11-20T16:18:49.584840+00:00",
+            "finished_at": "2026-11-20T16:18:49.590555+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.463345000033314,
+            "error": null,
+            "started_at": "2026-11-20T16:18:49.640715+00:00",
+            "finished_at": "2026-11-20T16:18:49.645310+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.798696000023028,
+            "error": null,
+            "started_at": "2026-11-20T16:18:49.695543+00:00",
+            "finished_at": "2026-11-20T16:18:49.700484+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.754505999983394,
+            "error": null,
+            "started_at": "2026-11-20T16:18:49.750710+00:00",
+            "finished_at": "2026-11-20T16:18:49.755682+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.635729000028732,
+            "error": null,
+            "started_at": "2026-11-20T16:18:49.805854+00:00",
+            "finished_at": "2026-11-20T16:18:49.810614+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 4.463345000033314,
+            "max": 16.986733999999615,
+            "mean": 6.763863375006451,
+            "median": 5.196018500015498,
+            "stddev": 4.217215949348725
+          }
+        }
+      },
+      "evaluation": {
+        "passed": true,
+        "checks": {
+          "baseline_success": true,
+          "during_samples_inside_fault": true,
+          "fault_effect_observed": true,
+          "controller_passed": true,
+          "cleanup_verified": true,
+          "service_state_restored": true,
+          "recovery_success": true
+        },
+        "baseline_mean_ms": 6.15894587500776,
+        "during_success_mean_ms": null,
+        "during_failures": 3,
+        "during_sample_count": 3,
+        "recovery_successes": 8,
+        "recovery_requests": 8
+      }
+    },
+    {
+      "trial": 1,
+      "fault_type": "disconnect",
+      "run_id": "qa-disconnect-20261120T161850Z-66739474",
+      "before": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.568455999991784,
+            "error": null,
+            "started_at": "2026-11-20T16:18:50.314894+00:00",
+            "finished_at": "2026-11-20T16:18:50.320570+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.367616999966685,
+            "error": null,
+            "started_at": "2026-11-20T16:18:50.370922+00:00",
+            "finished_at": "2026-11-20T16:18:50.377405+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.340410999986943,
+            "error": null,
+            "started_at": "2026-11-20T16:18:50.427666+00:00",
+            "finished_at": "2026-11-20T16:18:50.432143+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.127573999970991,
+            "error": null,
+            "started_at": "2026-11-20T16:18:50.482271+00:00",
+            "finished_at": "2026-11-20T16:18:50.487768+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 7.822144999977354,
+            "error": null,
+            "started_at": "2026-11-20T16:18:50.538048+00:00",
+            "finished_at": "2026-11-20T16:18:50.546055+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.947897000031844,
+            "error": null,
+            "started_at": "2026-11-20T16:18:50.596381+00:00",
+            "finished_at": "2026-11-20T16:18:50.603456+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.96359900000698,
+            "error": null,
+            "started_at": "2026-11-20T16:18:50.653817+00:00",
+            "finished_at": "2026-11-20T16:18:50.658892+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.231779999997798,
+            "error": null,
+            "started_at": "2026-11-20T16:18:50.709136+00:00",
+            "finished_at": "2026-11-20T16:18:50.713470+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 4.231779999997798,
+            "max": 7.822144999977354,
+            "mean": 5.671184874991297,
+            "median": 5.3480149999813875,
+            "stddev": 1.275663989034103
+          }
+        }
+      },
+      "during": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by NameResolutionError(\"HTTPConnection(host='server', port=5000): Failed to resolve 'server' ([Errno -2] Name or service not known)\"))",
+            "started_at": "2026-11-20T16:18:51.770256+00:00",
+            "finished_at": "2026-11-20T16:18:55.771875+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by NameResolutionError(\"HTTPConnection(host='server', port=5000): Failed to resolve 'server' ([Errno -2] Name or service not known)\"))",
+            "started_at": "2026-11-20T16:18:55.822132+00:00",
+            "finished_at": "2026-11-20T16:18:59.661349+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 18.4054360000232,
+            "error": null,
+            "started_at": "2026-11-20T16:18:59.711555+00:00",
+            "finished_at": "2026-11-20T16:18:59.730522+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 3,
+          "successful_requests": 1,
+          "failed_requests": 2,
+          "success_rate": 33.33333333333333,
+          "latency_ms": {
+            "min": 18.4054360000232,
+            "max": 18.4054360000232,
+            "mean": 18.4054360000232,
+            "median": 18.4054360000232,
+            "stddev": null
+          }
+        }
+      },
+      "after": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.219434000025558,
+            "error": null,
+            "started_at": "2026-11-20T16:19:01.322457+00:00",
+            "finished_at": "2026-11-20T16:19:01.327815+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.404093000005105,
+            "error": null,
+            "started_at": "2026-11-20T16:19:01.378016+00:00",
+            "finished_at": "2026-11-20T16:19:01.382536+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.065735000040149,
+            "error": null,
+            "started_at": "2026-11-20T16:19:01.432763+00:00",
+            "finished_at": "2026-11-20T16:19:01.436929+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.815981000012016,
+            "error": null,
+            "started_at": "2026-11-20T16:19:01.487222+00:00",
+            "finished_at": "2026-11-20T16:19:01.493170+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 15.181331999997383,
+            "error": null,
+            "started_at": "2026-11-20T16:19:01.543402+00:00",
+            "finished_at": "2026-11-20T16:19:01.558749+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.968185000005178,
+            "error": null,
+            "started_at": "2026-11-20T16:19:01.608971+00:00",
+            "finished_at": "2026-11-20T16:19:01.616099+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.58512900002961,
+            "error": null,
+            "started_at": "2026-11-20T16:19:01.666346+00:00",
+            "finished_at": "2026-11-20T16:19:01.673094+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.822032999991734,
+            "error": null,
+            "started_at": "2026-11-20T16:19:01.723329+00:00",
+            "finished_at": "2026-11-20T16:19:01.730315+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 4.065735000040149,
+            "max": 15.181331999997383,
+            "mean": 6.882740250013342,
+            "median": 6.200555000020813,
+            "stddev": 3.5244038485068274
+          }
+        }
+      },
+      "evaluation": {
+        "passed": false,
+        "checks": {
+          "baseline_success": true,
+          "during_samples_inside_fault": false,
+          "fault_effect_observed": true,
+          "controller_passed": true,
+          "cleanup_verified": true,
+          "service_state_restored": true,
+          "recovery_success": true
+        },
+        "baseline_mean_ms": 5.671184874991297,
+        "during_success_mean_ms": null,
+        "during_failures": 1,
+        "during_sample_count": 1,
+        "recovery_successes": 8,
+        "recovery_requests": 8
+      }
+    },
+    {
+      "trial": 1,
+      "fault_type": "process_failure",
+      "run_id": "qa-process-failure-20261120T161902Z-9875ec10",
+      "before": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.310003000000506,
+            "error": null,
+            "started_at": "2026-11-20T16:19:02.255006+00:00",
+            "finished_at": "2026-11-20T16:19:02.259419+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.173511000009512,
+            "error": null,
+            "started_at": "2026-11-20T16:19:02.309668+00:00",
+            "finished_at": "2026-11-20T16:19:02.315073+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.804759999989528,
+            "error": null,
+            "started_at": "2026-11-20T16:19:02.365309+00:00",
+            "finished_at": "2026-11-20T16:19:02.371230+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.137682000054156,
+            "error": null,
+            "started_at": "2026-11-20T16:19:02.421427+00:00",
+            "finished_at": "2026-11-20T16:19:02.426710+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.055252000010114,
+            "error": null,
+            "started_at": "2026-11-20T16:19:02.476933+00:00",
+            "finished_at": "2026-11-20T16:19:02.483154+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.117444000030446,
+            "error": null,
+            "started_at": "2026-11-20T16:19:02.533328+00:00",
+            "finished_at": "2026-11-20T16:19:02.537545+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.713408000019626,
+            "error": null,
+            "started_at": "2026-11-20T16:19:02.587728+00:00",
+            "finished_at": "2026-11-20T16:19:02.593582+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.232352000007268,
+            "error": null,
+            "started_at": "2026-11-20T16:19:02.643858+00:00",
+            "finished_at": "2026-11-20T16:19:02.649203+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 4.117444000030446,
+            "max": 6.055252000010114,
+            "mean": 5.1930515000151445,
+            "median": 5.20293150000839,
+            "stddev": 0.6897252214362375
+          }
+        }
+      },
+      "during": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by NameResolutionError(\"HTTPConnection(host='server', port=5000): Failed to resolve 'server' ([Errno -2] Name or service not known)\"))",
+            "started_at": "2026-11-20T16:19:03.707435+00:00",
+            "finished_at": "2026-11-20T16:19:07.703112+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by NameResolutionError(\"HTTPConnection(host='server', port=5000): Failed to resolve 'server' ([Errno -2] Name or service not known)\"))",
+            "started_at": "2026-11-20T16:19:07.753386+00:00",
+            "finished_at": "2026-11-20T16:19:11.610020+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by NameResolutionError(\"HTTPConnection(host='server', port=5000): Failed to resolve 'server' ([Errno -2] Name or service not known)\"))",
+            "started_at": "2026-11-20T16:19:11.660229+00:00",
+            "finished_at": "2026-11-20T16:19:15.506101+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 3,
+          "successful_requests": 0,
+          "failed_requests": 3,
+          "success_rate": 0.0,
+          "latency_ms": {
+            "min": null,
+            "max": null,
+            "mean": null,
+            "median": null,
+            "stddev": null
+          }
+        }
+      },
+      "after": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 15.507827000021734,
+            "error": null,
+            "started_at": "2026-11-20T16:19:20.089757+00:00",
+            "finished_at": "2026-11-20T16:19:20.105429+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 7.887631000016881,
+            "error": null,
+            "started_at": "2026-11-20T16:19:20.155628+00:00",
+            "finished_at": "2026-11-20T16:19:20.163677+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 10.551815999974679,
+            "error": null,
+            "started_at": "2026-11-20T16:19:20.213863+00:00",
+            "finished_at": "2026-11-20T16:19:20.224567+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.346006000001125,
+            "error": null,
+            "started_at": "2026-11-20T16:19:20.274806+00:00",
+            "finished_at": "2026-11-20T16:19:20.281313+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 8.07325400000991,
+            "error": null,
+            "started_at": "2026-11-20T16:19:20.331549+00:00",
+            "finished_at": "2026-11-20T16:19:20.339781+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 8.342287000004944,
+            "error": null,
+            "started_at": "2026-11-20T16:19:20.390027+00:00",
+            "finished_at": "2026-11-20T16:19:20.398542+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 9.189192999997431,
+            "error": null,
+            "started_at": "2026-11-20T16:19:20.448790+00:00",
+            "finished_at": "2026-11-20T16:19:20.458153+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 7.444429000031505,
+            "error": null,
+            "started_at": "2026-11-20T16:19:20.508399+00:00",
+            "finished_at": "2026-11-20T16:19:20.516011+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 6.346006000001125,
+            "max": 15.507827000021734,
+            "mean": 9.167805375007276,
+            "median": 8.207770500007427,
+            "stddev": 2.8426035505486675
+          }
+        }
+      },
+      "evaluation": {
+        "passed": false,
+        "checks": {
+          "baseline_success": true,
+          "during_samples_inside_fault": false,
+          "fault_effect_observed": true,
+          "controller_passed": true,
+          "cleanup_verified": true,
+          "service_state_restored": true,
+          "recovery_success": true
+        },
+        "baseline_mean_ms": 5.1930515000151445,
+        "during_success_mean_ms": null,
+        "during_failures": 1,
+        "during_sample_count": 1,
+        "recovery_successes": 8,
+        "recovery_requests": 8
+      }
+    },
+    {
+      "trial": 2,
+      "fault_type": "latency",
+      "run_id": "qa-latency-20261120T161921Z-b9c77a12",
+      "before": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 9.921850000012,
+            "error": null,
+            "started_at": "2026-11-20T16:19:21.330248+00:00",
+            "finished_at": "2026-11-20T16:19:21.340366+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.691184999989218,
+            "error": null,
+            "started_at": "2026-11-20T16:19:21.390562+00:00",
+            "finished_at": "2026-11-20T16:19:21.396416+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.806029999997463,
+            "error": null,
+            "started_at": "2026-11-20T16:19:21.446633+00:00",
+            "finished_at": "2026-11-20T16:19:21.451567+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.231649999984711,
+            "error": null,
+            "started_at": "2026-11-20T16:19:21.501731+00:00",
+            "finished_at": "2026-11-20T16:19:21.507076+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.754412000011143,
+            "error": null,
+            "started_at": "2026-11-20T16:19:21.557238+00:00",
+            "finished_at": "2026-11-20T16:19:21.562100+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.923215999985132,
+            "error": null,
+            "started_at": "2026-11-20T16:19:21.612291+00:00",
+            "finished_at": "2026-11-20T16:19:21.618372+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 8.75497100003031,
+            "error": null,
+            "started_at": "2026-11-20T16:19:21.668581+00:00",
+            "finished_at": "2026-11-20T16:19:21.677440+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.203193999989253,
+            "error": null,
+            "started_at": "2026-11-20T16:19:21.727642+00:00",
+            "finished_at": "2026-11-20T16:19:21.732947+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 4.754412000011143,
+            "max": 9.921850000012,
+            "mean": 6.285813499999904,
+            "median": 5.461417499986965,
+            "stddev": 1.9501221799464417
+          }
+        }
+      },
+      "during": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 516.019568000047,
+            "error": null,
+            "started_at": "2026-11-20T16:19:22.761373+00:00",
+            "finished_at": "2026-11-20T16:19:23.277538+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 519.687394000016,
+            "error": null,
+            "started_at": "2026-11-20T16:19:23.327710+00:00",
+            "finished_at": "2026-11-20T16:19:23.847506+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 515.0030940000079,
+            "error": null,
+            "started_at": "2026-11-20T16:19:23.897736+00:00",
+            "finished_at": "2026-11-20T16:19:24.412894+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 3,
+          "successful_requests": 3,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 515.0030940000079,
+            "max": 519.687394000016,
+            "mean": 516.9033520000236,
+            "median": 516.019568000047,
+            "stddev": 2.4640357630277845
+          }
+        }
+      },
+      "after": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.447641000046133,
+            "error": null,
+            "started_at": "2026-11-20T16:19:32.562055+00:00",
+            "finished_at": "2026-11-20T16:19:32.567636+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.859952999993311,
+            "error": null,
+            "started_at": "2026-11-20T16:19:32.617796+00:00",
+            "finished_at": "2026-11-20T16:19:32.622797+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.281833999992159,
+            "error": null,
+            "started_at": "2026-11-20T16:19:32.672958+00:00",
+            "finished_at": "2026-11-20T16:19:32.679355+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.246680000003835,
+            "error": null,
+            "started_at": "2026-11-20T16:19:32.729566+00:00",
+            "finished_at": "2026-11-20T16:19:32.735920+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 3.3112809999806814,
+            "error": null,
+            "started_at": "2026-11-20T16:19:32.786154+00:00",
+            "finished_at": "2026-11-20T16:19:32.789599+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 9.485576000031415,
+            "error": null,
+            "started_at": "2026-11-20T16:19:32.840002+00:00",
+            "finished_at": "2026-11-20T16:19:32.849681+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.788802000007308,
+            "error": null,
+            "started_at": "2026-11-20T16:19:32.899909+00:00",
+            "finished_at": "2026-11-20T16:19:32.904835+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.896198000016284,
+            "error": null,
+            "started_at": "2026-11-20T16:19:32.955076+00:00",
+            "finished_at": "2026-11-20T16:19:32.961277+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 3.3112809999806814,
+            "max": 9.485576000031415,
+            "mean": 5.789745625008891,
+            "median": 5.671919500031208,
+            "stddev": 1.7827610687931452
+          }
+        }
+      },
+      "evaluation": {
+        "passed": true,
+        "checks": {
+          "baseline_success": true,
+          "during_samples_inside_fault": true,
+          "fault_effect_observed": true,
+          "controller_passed": true,
+          "cleanup_verified": true,
+          "service_state_restored": true,
+          "recovery_success": true
+        },
+        "baseline_mean_ms": 6.285813499999904,
+        "during_success_mean_ms": 516.9033520000236,
+        "during_failures": 0,
+        "during_sample_count": 3,
+        "recovery_successes": 8,
+        "recovery_requests": 8
+      }
+    },
+    {
+      "trial": 2,
+      "fault_type": "packet_loss",
+      "run_id": "qa-packet-loss-20261120T161933Z-4026c0d9",
+      "before": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.340187000025253,
+            "error": null,
+            "started_at": "2026-11-20T16:19:33.500413+00:00",
+            "finished_at": "2026-11-20T16:19:33.504860+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 3.9826740000421523,
+            "error": null,
+            "started_at": "2026-11-20T16:19:33.555034+00:00",
+            "finished_at": "2026-11-20T16:19:33.559124+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.04567699999825,
+            "error": null,
+            "started_at": "2026-11-20T16:19:33.609344+00:00",
+            "finished_at": "2026-11-20T16:19:33.614502+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.1110359999834145,
+            "error": null,
+            "started_at": "2026-11-20T16:19:33.664741+00:00",
+            "finished_at": "2026-11-20T16:19:33.668963+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 3.967740000007325,
+            "error": null,
+            "started_at": "2026-11-20T16:19:33.719126+00:00",
+            "finished_at": "2026-11-20T16:19:33.723194+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 3.680759000019407,
+            "error": null,
+            "started_at": "2026-11-20T16:19:33.773367+00:00",
+            "finished_at": "2026-11-20T16:19:33.777202+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 3.9492180000024746,
+            "error": null,
+            "started_at": "2026-11-20T16:19:33.827366+00:00",
+            "finished_at": "2026-11-20T16:19:33.831436+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.053427999996529,
+            "error": null,
+            "started_at": "2026-11-20T16:19:33.881686+00:00",
+            "finished_at": "2026-11-20T16:19:33.886868+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 3.680759000019407,
+            "max": 5.053427999996529,
+            "mean": 4.266339875009351,
+            "median": 4.046855000012783,
+            "stddev": 0.5167959283739124
+          }
+        }
+      },
+      "during": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by ConnectTimeoutError(<HTTPConnection(host='server', port=5000) at 0x7b34cb6e25d0>, 'Connection to server timed out. (connect timeout=1.0)'))",
+            "started_at": "2026-11-20T16:19:34.717411+00:00",
+            "finished_at": "2026-11-20T16:19:35.722761+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by ConnectTimeoutError(<HTTPConnection(host='server', port=5000) at 0x7b34cb102630>, 'Connection to server timed out. (connect timeout=1.0)'))",
+            "started_at": "2026-11-20T16:19:35.772963+00:00",
+            "finished_at": "2026-11-20T16:19:36.777842+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by ConnectTimeoutError(<HTTPConnection(host='server', port=5000) at 0x7b34cb102db0>, 'Connection to server timed out. (connect timeout=1.0)'))",
+            "started_at": "2026-11-20T16:19:36.828035+00:00",
+            "finished_at": "2026-11-20T16:19:37.831147+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 3,
+          "successful_requests": 0,
+          "failed_requests": 3,
+          "success_rate": 0.0,
+          "latency_ms": {
+            "min": null,
+            "max": null,
+            "mean": null,
+            "median": null,
+            "stddev": null
+          }
+        }
+      },
+      "after": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.134560000020883,
+            "error": null,
+            "started_at": "2026-11-20T16:19:45.041559+00:00",
+            "finished_at": "2026-11-20T16:19:45.047842+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 7.204985999976543,
+            "error": null,
+            "started_at": "2026-11-20T16:19:45.098097+00:00",
+            "finished_at": "2026-11-20T16:19:45.105415+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.961286000025211,
+            "error": null,
+            "started_at": "2026-11-20T16:19:45.155613+00:00",
+            "finished_at": "2026-11-20T16:19:45.160677+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 3.7264080000340982,
+            "error": null,
+            "started_at": "2026-11-20T16:19:45.210848+00:00",
+            "finished_at": "2026-11-20T16:19:45.214668+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.068733000006432,
+            "error": null,
+            "started_at": "2026-11-20T16:19:45.264910+00:00",
+            "finished_at": "2026-11-20T16:19:45.271117+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.408609000004617,
+            "error": null,
+            "started_at": "2026-11-20T16:19:45.321330+00:00",
+            "finished_at": "2026-11-20T16:19:45.327913+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.986942999982148,
+            "error": null,
+            "started_at": "2026-11-20T16:19:45.378159+00:00",
+            "finished_at": "2026-11-20T16:19:45.384303+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.347917000027792,
+            "error": null,
+            "started_at": "2026-11-20T16:19:45.434576+00:00",
+            "finished_at": "2026-11-20T16:19:45.441179+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 3.7264080000340982,
+            "max": 7.204985999976543,
+            "mean": 5.854930250009716,
+            "median": 6.101646500013658,
+            "stddev": 1.0584885055879159
+          }
+        }
+      },
+      "evaluation": {
+        "passed": true,
+        "checks": {
+          "baseline_success": true,
+          "during_samples_inside_fault": true,
+          "fault_effect_observed": true,
+          "controller_passed": true,
+          "cleanup_verified": true,
+          "service_state_restored": true,
+          "recovery_success": true
+        },
+        "baseline_mean_ms": 4.266339875009351,
+        "during_success_mean_ms": null,
+        "during_failures": 3,
+        "during_sample_count": 3,
+        "recovery_successes": 8,
+        "recovery_requests": 8
+      }
+    },
+    {
+      "trial": 2,
+      "fault_type": "disconnect",
+      "run_id": "qa-disconnect-20261120T161946Z-8c3bed53",
+      "before": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 10.231427000007898,
+            "error": null,
+            "started_at": "2026-11-20T16:19:45.992685+00:00",
+            "finished_at": "2026-11-20T16:19:46.003108+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.574053000008462,
+            "error": null,
+            "started_at": "2026-11-20T16:19:46.053344+00:00",
+            "finished_at": "2026-11-20T16:19:46.060127+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.835404999970706,
+            "error": null,
+            "started_at": "2026-11-20T16:19:46.110404+00:00",
+            "finished_at": "2026-11-20T16:19:46.116405+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.718624000029649,
+            "error": null,
+            "started_at": "2026-11-20T16:19:46.166649+00:00",
+            "finished_at": "2026-11-20T16:19:46.173513+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.65451199997824,
+            "error": null,
+            "started_at": "2026-11-20T16:19:46.223716+00:00",
+            "finished_at": "2026-11-20T16:19:46.229534+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.233992999957081,
+            "error": null,
+            "started_at": "2026-11-20T16:19:46.279758+00:00",
+            "finished_at": "2026-11-20T16:19:46.284099+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.3341449999729775,
+            "error": null,
+            "started_at": "2026-11-20T16:19:46.334329+00:00",
+            "finished_at": "2026-11-20T16:19:46.338761+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 3.8861109999857035,
+            "error": null,
+            "started_at": "2026-11-20T16:19:46.389132+00:00",
+            "finished_at": "2026-11-20T16:19:46.393134+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 3.8861109999857035,
+            "max": 10.231427000007898,
+            "mean": 5.93353374998884,
+            "median": 5.744958499974473,
+            "stddev": 2.0432615187978103
+          }
+        }
+      },
+      "during": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by NameResolutionError(\"HTTPConnection(host='server', port=5000): Failed to resolve 'server' ([Errno -5] No address associated with hostname)\"))",
+            "started_at": "2026-11-20T16:19:47.478946+00:00",
+            "finished_at": "2026-11-20T16:19:51.484423+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by NameResolutionError(\"HTTPConnection(host='server', port=5000): Failed to resolve 'server' ([Errno -2] Name or service not known)\"))",
+            "started_at": "2026-11-20T16:19:51.534901+00:00",
+            "finished_at": "2026-11-20T16:19:55.385993+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 39.24752799997577,
+            "error": null,
+            "started_at": "2026-11-20T16:19:55.436392+00:00",
+            "finished_at": "2026-11-20T16:19:55.476461+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 3,
+          "successful_requests": 1,
+          "failed_requests": 2,
+          "success_rate": 33.33333333333333,
+          "latency_ms": {
+            "min": 39.24752799997577,
+            "max": 39.24752799997577,
+            "mean": 39.24752799997577,
+            "median": 39.24752799997577,
+            "stddev": null
+          }
+        }
+      },
+      "after": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.3847029999710685,
+            "error": null,
+            "started_at": "2026-11-20T16:19:56.948114+00:00",
+            "finished_at": "2026-11-20T16:19:56.952591+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.880390999971951,
+            "error": null,
+            "started_at": "2026-11-20T16:19:57.002833+00:00",
+            "finished_at": "2026-11-20T16:19:57.007831+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.337691999978688,
+            "error": null,
+            "started_at": "2026-11-20T16:19:57.058018+00:00",
+            "finished_at": "2026-11-20T16:19:57.062452+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.341886000053364,
+            "error": null,
+            "started_at": "2026-11-20T16:19:57.112831+00:00",
+            "finished_at": "2026-11-20T16:19:57.118289+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.2621650000000955,
+            "error": null,
+            "started_at": "2026-11-20T16:19:57.168537+00:00",
+            "finished_at": "2026-11-20T16:19:57.172902+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 3.4884109999779866,
+            "error": null,
+            "started_at": "2026-11-20T16:19:57.223075+00:00",
+            "finished_at": "2026-11-20T16:19:57.226650+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.455517999986114,
+            "error": null,
+            "started_at": "2026-11-20T16:19:57.276913+00:00",
+            "finished_at": "2026-11-20T16:19:57.281489+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.912149000039335,
+            "error": null,
+            "started_at": "2026-11-20T16:19:57.331768+00:00",
+            "finished_at": "2026-11-20T16:19:57.337793+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 3.4884109999779866,
+            "max": 5.912149000039335,
+            "mean": 4.632864374997325,
+            "median": 4.420110499978591,
+            "stddev": 0.7394886589212929
+          }
+        }
+      },
+      "evaluation": {
+        "passed": false,
+        "checks": {
+          "baseline_success": true,
+          "during_samples_inside_fault": false,
+          "fault_effect_observed": true,
+          "controller_passed": true,
+          "cleanup_verified": true,
+          "service_state_restored": true,
+          "recovery_success": true
+        },
+        "baseline_mean_ms": 5.93353374998884,
+        "during_success_mean_ms": null,
+        "during_failures": 1,
+        "during_sample_count": 1,
+        "recovery_successes": 8,
+        "recovery_requests": 8
+      }
+    },
+    {
+      "trial": 2,
+      "fault_type": "process_failure",
+      "run_id": "qa-process-failure-20261120T161958Z-cc7e1a60",
+      "before": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 7.208521999984896,
+            "error": null,
+            "started_at": "2026-11-20T16:19:57.775868+00:00",
+            "finished_at": "2026-11-20T16:19:57.783216+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.484519000025557,
+            "error": null,
+            "started_at": "2026-11-20T16:19:57.833429+00:00",
+            "finished_at": "2026-11-20T16:19:57.840060+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 7.00448600002801,
+            "error": null,
+            "started_at": "2026-11-20T16:19:57.890289+00:00",
+            "finished_at": "2026-11-20T16:19:57.897463+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.187890000035168,
+            "error": null,
+            "started_at": "2026-11-20T16:19:57.947718+00:00",
+            "finished_at": "2026-11-20T16:19:57.954127+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.897593000009692,
+            "error": null,
+            "started_at": "2026-11-20T16:19:58.004417+00:00",
+            "finished_at": "2026-11-20T16:19:58.009444+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 3.6575889999994615,
+            "error": null,
+            "started_at": "2026-11-20T16:19:58.059665+00:00",
+            "finished_at": "2026-11-20T16:19:58.063415+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 3.741117000004124,
+            "error": null,
+            "started_at": "2026-11-20T16:19:58.113601+00:00",
+            "finished_at": "2026-11-20T16:19:58.117431+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 4.3157799999562485,
+            "error": null,
+            "started_at": "2026-11-20T16:19:58.167609+00:00",
+            "finished_at": "2026-11-20T16:19:58.172014+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 3.6575889999994615,
+            "max": 7.208521999984896,
+            "mean": 5.437187000005395,
+            "median": 5.54274150002243,
+            "stddev": 1.4563580300218673
+          }
+        }
+      },
+      "during": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by NameResolutionError(\"HTTPConnection(host='server', port=5000): Failed to resolve 'server' ([Errno -2] Name or service not known)\"))",
+            "started_at": "2026-11-20T16:19:59.297743+00:00",
+            "finished_at": "2026-11-20T16:20:03.267735+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by NameResolutionError(\"HTTPConnection(host='server', port=5000): Failed to resolve 'server' ([Errno -2] Name or service not known)\"))",
+            "started_at": "2026-11-20T16:20:03.318637+00:00",
+            "finished_at": "2026-11-20T16:20:07.191872+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": null,
+            "http_status": null,
+            "success": false,
+            "latency_ms": null,
+            "error": "HTTPConnectionPool(host='server', port=5000): Max retries exceeded with url: /process (Caused by NameResolutionError(\"HTTPConnection(host='server', port=5000): Failed to resolve 'server' ([Errno -2] Name or service not known)\"))",
+            "started_at": "2026-11-20T16:20:07.242009+00:00",
+            "finished_at": "2026-11-20T16:20:11.095674+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 3,
+          "successful_requests": 0,
+          "failed_requests": 3,
+          "success_rate": 0.0,
+          "latency_ms": {
+            "min": null,
+            "max": null,
+            "mean": null,
+            "median": null,
+            "stddev": null
+          }
+        }
+      },
+      "after": {
+        "results": [
+          {
+            "request_id": "qa-0",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 16.162608999991335,
+            "error": null,
+            "started_at": "2026-11-20T16:20:15.390384+00:00",
+            "finished_at": "2026-11-20T16:20:15.406681+00:00"
+          },
+          {
+            "request_id": "qa-1",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.359017000022504,
+            "error": null,
+            "started_at": "2026-11-20T16:20:15.456866+00:00",
+            "finished_at": "2026-11-20T16:20:15.463376+00:00"
+          },
+          {
+            "request_id": "qa-2",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.088220999994064,
+            "error": null,
+            "started_at": "2026-11-20T16:20:15.513563+00:00",
+            "finished_at": "2026-11-20T16:20:15.518748+00:00"
+          },
+          {
+            "request_id": "qa-3",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.143534000012551,
+            "error": null,
+            "started_at": "2026-11-20T16:20:15.568896+00:00",
+            "finished_at": "2026-11-20T16:20:15.574131+00:00"
+          },
+          {
+            "request_id": "qa-4",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.153428999994048,
+            "error": null,
+            "started_at": "2026-11-20T16:20:15.624351+00:00",
+            "finished_at": "2026-11-20T16:20:15.630659+00:00"
+          },
+          {
+            "request_id": "qa-5",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.555019000041739,
+            "error": null,
+            "started_at": "2026-11-20T16:20:15.680830+00:00",
+            "finished_at": "2026-11-20T16:20:15.686490+00:00"
+          },
+          {
+            "request_id": "qa-6",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 5.568357000015567,
+            "error": null,
+            "started_at": "2026-11-20T16:20:15.736702+00:00",
+            "finished_at": "2026-11-20T16:20:15.742394+00:00"
+          },
+          {
+            "request_id": "qa-7",
+            "input_value": 10,
+            "expected_result": 20,
+            "observed_result": 20,
+            "http_status": 200,
+            "success": true,
+            "latency_ms": 6.658091000019795,
+            "error": null,
+            "started_at": "2026-11-20T16:20:15.792586+00:00",
+            "finished_at": "2026-11-20T16:20:15.799447+00:00"
+          }
+        ],
+        "summary": {
+          "total_requests": 8,
+          "successful_requests": 8,
+          "failed_requests": 0,
+          "success_rate": 100.0,
+          "latency_ms": {
+            "min": 5.088220999994064,
+            "max": 16.162608999991335,
+            "mean": 7.08603462501145,
+            "median": 5.860893000004808,
+            "stddev": 3.7105557570899173
+          }
+        }
+      },
+      "evaluation": {
+        "passed": false,
+        "checks": {
+          "baseline_success": true,
+          "during_samples_inside_fault": false,
+          "fault_effect_observed": true,
+          "controller_passed": true,
+          "cleanup_verified": true,
+          "service_state_restored": true,
+          "recovery_success": true
+        },
+        "baseline_mean_ms": 5.437187000005395,
+        "during_success_mean_ms": null,
+        "during_failures": 1,
+        "during_sample_count": 1,
+        "recovery_successes": 8,
+        "recovery_requests": 8
+      }
+    }
+  ],
+  "interruption": {
+    "run_id": "qa-latency-20261120T162016Z-b98395e6",
+    "passed": true,
+    "recovery": {
+      "results": [
+        {
+          "request_id": "qa-0",
+          "input_value": 10,
+          "expected_result": 20,
+          "observed_result": 20,
+          "http_status": 200,
+          "success": true,
+          "latency_ms": 5.745703999991747,
+          "error": null,
+          "started_at": "2026-11-20T16:20:18.820080+00:00",
+          "finished_at": "2026-11-20T16:20:18.825928+00:00"
+        },
+        {
+          "request_id": "qa-1",
+          "input_value": 10,
+          "expected_result": 20,
+          "observed_result": 20,
+          "http_status": 200,
+          "success": true,
+          "latency_ms": 6.222429999979795,
+          "error": null,
+          "started_at": "2026-11-20T16:20:18.876192+00:00",
+          "finished_at": "2026-11-20T16:20:18.882553+00:00"
+        },
+        {
+          "request_id": "qa-2",
+          "input_value": 10,
+          "expected_result": 20,
+          "observed_result": 20,
+          "http_status": 200,
+          "success": true,
+          "latency_ms": 5.215255000052821,
+          "error": null,
+          "started_at": "2026-11-20T16:20:18.932762+00:00",
+          "finished_at": "2026-11-20T16:20:18.938083+00:00"
+        },
+        {
+          "request_id": "qa-3",
+          "input_value": 10,
+          "expected_result": 20,
+          "observed_result": 20,
+          "http_status": 200,
+          "success": true,
+          "latency_ms": 5.489969999985078,
+          "error": null,
+          "started_at": "2026-11-20T16:20:18.988267+00:00",
+          "finished_at": "2026-11-20T16:20:18.993915+00:00"
+        },
+        {
+          "request_id": "qa-4",
+          "input_value": 10,
+          "expected_result": 20,
+          "observed_result": 20,
+          "http_status": 200,
+          "success": true,
+          "latency_ms": 7.284914999956982,
+          "error": null,
+          "started_at": "2026-11-20T16:20:19.044061+00:00",
+          "finished_at": "2026-11-20T16:20:19.051550+00:00"
+        },
+        {
+          "request_id": "qa-5",
+          "input_value": 10,
+          "expected_result": 20,
+          "observed_result": 20,
+          "http_status": 200,
+          "success": true,
+          "latency_ms": 17.526727000017672,
+          "error": null,
+          "started_at": "2026-11-20T16:20:19.101705+00:00",
+          "finished_at": "2026-11-20T16:20:19.119423+00:00"
+        },
+        {
+          "request_id": "qa-6",
+          "input_value": 10,
+          "expected_result": 20,
+          "observed_result": 20,
+          "http_status": 200,
+          "success": true,
+          "latency_ms": 5.415944999981548,
+          "error": null,
+          "started_at": "2026-11-20T16:20:19.169662+00:00",
+          "finished_at": "2026-11-20T16:20:19.175198+00:00"
+        },
+        {
+          "request_id": "qa-7",
+          "input_value": 10,
+          "expected_result": 20,
+          "observed_result": 20,
+          "http_status": 200,
+          "success": true,
+          "latency_ms": 3.514516000052481,
+          "error": null,
+          "started_at": "2026-11-20T16:20:19.225421+00:00",
+          "finished_at": "2026-11-20T16:20:19.229038+00:00"
+        }
+      ],
+      "summary": {
+        "total_requests": 8,
+        "successful_requests": 8,
+        "failed_requests": 0,
+        "success_rate": 100.0,
+        "latency_ms": {
+          "min": 3.514516000052481,
+          "max": 17.526727000017672,
+          "mean": 7.0519327500022655,
+          "median": 5.617836999988413,
+          "stddev": 4.3617295003447305
+        }
+      }
+    }
+  },
+  "passed": false,
+  "finished_at": "2026-11-20T16:20:20.594967+00:00"
+}

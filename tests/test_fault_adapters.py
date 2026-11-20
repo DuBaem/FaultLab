@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import subprocess
 import unittest
+from unittest.mock import patch
 
 from faultlab.docker_cli import NetworkAttachment
 from faultlab.fault_adapters import FaultExecutor
@@ -156,6 +157,32 @@ class FaultExecutorTests(unittest.TestCase):
 
         with self.assertRaisesRegex(RuntimeError, "could not be verified"):
             self.executor.cleanup(handle)
+
+    def test_failed_or_interrupted_netem_application_attempts_rollback(self) -> None:
+        for failure in (RuntimeError("command timed out"), KeyboardInterrupt()):
+            with self.subTest(failure=type(failure).__name__):
+                docker = FakeDocker()
+                real_exec = docker.exec
+
+                def interrupted(service, arguments, *, check=True):
+                    if "replace" in arguments:
+                        raise failure
+                    return real_exec(service, arguments, check=check)
+
+                with patch.object(docker, "exec", interrupted):
+                    with self.assertRaises(type(failure)):
+                        FaultExecutor(docker).apply({"id": "delay-server", "type": "latency",
+                                                    "parameters": {"latency_ms": 250}}, "server")
+                self.assertIn(("server", ["tc", "qdisc", "del", "dev", "eth0", "root"], False),
+                              docker.exec_calls)
+
+    def test_interrupted_process_stop_attempts_restart(self) -> None:
+        with patch.object(self.docker, "kill", side_effect=KeyboardInterrupt()):
+            with self.assertRaises(KeyboardInterrupt):
+                self.executor.apply({"id": "stop-server", "type": "process_failure",
+                                     "parameters": {"signal": "SIGTERM"}}, "server")
+        self.assertEqual(["server"], self.docker.started)
+        self.assertEqual(["server"], self.docker.health_waits)
 
 
 if __name__ == "__main__":

@@ -221,4 +221,5 @@ __marimo__/
 # FaultLab baseline run output (keep the folder, not the generated runs)
 results/*.json
 results/experiments/
+results/fault-safety/
 !results/.gitkeep

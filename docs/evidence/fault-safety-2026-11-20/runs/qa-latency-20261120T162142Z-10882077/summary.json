@@ -1,0 +1,29 @@
+{
+  "run_id": "qa-latency-20261120T162142Z-10882077",
+  "scenario_id": "qa-latency",
+  "status": "passed",
+  "dry_run": false,
+  "started_at": "2026-11-20T16:21:42.892728+00:00",
+  "finished_at": "2026-11-20T16:21:52.531405+00:00",
+  "actions_completed": 1,
+  "actions_requested": 1,
+  "actions": [
+    {
+      "action_id": "safety-fault",
+      "fault_type": "latency",
+      "target": "api-server",
+      "service": "server",
+      "planned_start_seconds": 0.0,
+      "observed_start_seconds": 0.658240199991269,
+      "start_drift_seconds": 0.658240199991269,
+      "planned_end_seconds": 8.0,
+      "observed_end_seconds": 9.633623699992313,
+      "cleanup_verified": true
+    }
+  ],
+  "cleanup_errors": [],
+  "logging_errors": [],
+  "error": null,
+  "event_log": "events.jsonl",
+  "scenario_snapshot": "scenario.json"
+}

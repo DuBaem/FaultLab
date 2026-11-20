@@ -1,0 +1,16 @@
+{
+  "run_id": "qa-latency-20261120T162237Z-19b55d29",
+  "scenario_id": "qa-latency",
+  "status": "failed",
+  "dry_run": false,
+  "started_at": "2026-11-20T16:22:37.459047+00:00",
+  "finished_at": "2026-11-20T16:22:39.611673+00:00",
+  "actions_completed": 0,
+  "actions_requested": 1,
+  "actions": [],
+  "cleanup_errors": [],
+  "logging_errors": [],
+  "error": "controlled QA interruption",
+  "event_log": "events.jsonl",
+  "scenario_snapshot": "scenario.json"
+}

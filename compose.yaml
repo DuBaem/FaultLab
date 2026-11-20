@@ -6,8 +6,7 @@ services:
     container_name: faultlab-server
     ports:
       - "5000:5000"
-    # NET_ADMIN is limited to this local test container and is required for
-    # FaultLab's tc/netem latency and packet-loss experiments.
+    # Only the test server needs the extra permission to delay or drop outgoing packets.
     cap_add:
       - NET_ADMIN
     healthcheck:

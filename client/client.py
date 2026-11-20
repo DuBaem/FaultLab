@@ -24,8 +24,7 @@ def load_config():
 
 
 def check_health(server_url, timeout_s):
-    # A 200 by itself isn't enough proof the server is actually healthy -
-    # the body has to say so too.
+    # A misconfigured endpoint can still return HTTP 200. Check its health message too.
     try:
         response = requests.get(f"{server_url}/health", timeout=timeout_s)
     except requests.RequestException as exc:

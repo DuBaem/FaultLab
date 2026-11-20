@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "scenario_id": "server-process-failure-demo",
-  "description": "Stop the local server process with SIGTERM and restart it after a bounded interval.",
+  "description": "Stop the server with SIGTERM, wait five seconds, then start it again.",
   "targets": [
     {
       "name": "api-server",
@@ -22,8 +22,8 @@
     }
   ],
   "expected_outcomes": [
-    "Requests fail while the server process is stopped.",
-    "The server container restarts and returns to a healthy state."
+    "The client should get no reply while the server is stopped.",
+    "The restarted server should pass its health check."
   ],
   "safety": {
     "scope": "local_docker_only",

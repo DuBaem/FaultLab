@@ -1,4 +1,4 @@
-"""Check that the safety evaluator rejects missing evidence and recovery failures."""
+"""A trial should fail if a request misses the fault window or the server fails to recover."""
 import copy
 
 import pytest

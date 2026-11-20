@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "scenario_id": "invalid-external-target",
-  "description": "This example must be rejected because the target is outside the local allowlist.",
+  "description": "Try to target public-api. The validator should reject it because only the local server is allowed.",
   "targets": [
     {
       "name": "external-api",
@@ -21,7 +21,7 @@
     }
   ],
   "expected_outcomes": [
-    "Validation rejects the unapproved target before execution."
+    "The validator should flag the service name before the controller runs."
   ],
   "safety": {
     "scope": "local_docker_only",

@@ -19,8 +19,7 @@ jobs:
       - name: Install dependencies
         run: python -m pip install -r requirements-dev.txt
 
-      # The live integration test needs a real server, so it's run separately
-      # in the docker-smoke job instead of relying on it to skip itself here.
+      # The Docker job below starts a real server for the integration test.
       - name: Run unit tests
         run: >-
           python -m pytest
@@ -41,8 +40,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # This job runs on its own clean runner, separate from unit-tests, so it
-      # needs its own Python setup before it can run pytest or client.py.
+      # Each job starts on a fresh runner and needs its own Python environment.
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"

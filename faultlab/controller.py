@@ -33,7 +33,7 @@ class Executor(Protocol):
 
 
 class ScenarioExecutionError(RuntimeError):
-    """Raised after a failed run has been cleaned up and documented."""
+    """Point callers to the summary when a scenario fails or cleanup reports an error."""
 
     def __init__(self, message: str, summary_path: Path):
         self.summary_path = summary_path
@@ -104,7 +104,7 @@ def execute_scenario(
     now: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
     time_scale: float = 1.0,
 ) -> dict[str, Any]:
-    """Run a validated scenario and return its persisted summary."""
+    """Check the schedule, run it, and return the summary saved in the run folder."""
 
     issues = validate_scenario(document)
     if not issues:
@@ -288,8 +288,8 @@ def execute_scenario(
 
 
 def _build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run a bounded FaultLab scenario.")
-    parser.add_argument("scenario", type=Path, help="validated JSON scenario to run")
+    parser = argparse.ArgumentParser(description="Run a fault scenario against the local FaultLab server.")
+    parser.add_argument("scenario", type=Path, help="path to the scenario JSON file")
     parser.add_argument(
         "--results-dir",
         type=Path,
@@ -299,7 +299,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="exercise scheduling and event output instantly without changing Docker",
+        help="write the planned sequence to a run folder without waiting or changing Docker",
     )
     return parser
 

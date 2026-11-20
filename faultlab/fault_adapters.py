@@ -1,4 +1,4 @@
-"""Bounded Docker adapters for FaultLab's four approved fault categories."""
+"""Apply and undo the four faults supported by the local FaultLab server."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ def _format_number(value: int | float) -> str:
 
 @dataclass(slots=True)
 class FaultHandle:
-    """Runtime state required to reverse one applied fault."""
+    """Keep the details needed to undo this action."""
 
     action_id: str
     fault_type: str

@@ -1,8 +1,7 @@
-"""Small, allowlisted wrapper around the Docker command-line interface.
+"""Docker commands the controller uses on the local FaultLab stack.
 
-Scenario data never becomes a shell command. Every Docker and Linux argument is
-passed as a separate subprocess argument after service names and values have
-been validated.
+Callers validate service names and fault settings. This module passes each
+argument directly to the Docker CLI.
 """
 
 from __future__ import annotations
@@ -21,7 +20,7 @@ CommandRunner = Callable[..., subprocess.CompletedProcess[str]]
 
 
 class DockerCommandError(RuntimeError):
-    """Raised when an expected Docker command cannot be completed."""
+    """Report a Docker command that failed or timed out."""
 
     def __init__(self, command: Sequence[str], result: subprocess.CompletedProcess[str]):
         self.command = tuple(command)

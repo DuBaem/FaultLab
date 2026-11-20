@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "scenario_id": "server-disconnect-demo",
-  "description": "Temporarily isolate the server from its local Docker network and reconnect it.",
+  "description": "Disconnect the server from its Docker networks for five seconds, then reconnect it.",
   "targets": [
     {
       "name": "api-server",
@@ -21,8 +21,8 @@
     }
   ],
   "expected_outcomes": [
-    "The server is unreachable from other Compose services while isolated.",
-    "The server service-name alias works again after reconnection."
+    "Other containers should lose contact with the server during the disconnect.",
+    "After reconnection, the client should be able to reach the server by its usual name."
   ],
   "safety": {
     "scope": "local_docker_only",

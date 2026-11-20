@@ -1,139 +1,59 @@
-# FaultLab Integration Contract (Version 1.0)
+# How to read a FaultLab run (version 1.0)
 
-This document defines the minimum interface used by the baseline, fault-control,
-recording/replay, and reset components.
+When you're matching a client observation to a fault, check which run it belongs to and whether the fault was active at the time. The controller gives each run one ID and records when each fault actually starts and ends. This is the format to use when connecting the controller, recorder, and replay tools.
 
-AI-assistance disclosure: this document was drafted with OpenAI Codex on
-October 22, 2026. The team must review, revise, understand, and document its use
-before treating it as project work.
+## Scenario input
 
-## First Integrated Path
+Start with the [two-fault example](../scenarios/demo-latency-packet-loss.json). It names the local Compose service `server` and gives it the scenario name `api-server`. Each action refers to that name in its `target`. An action has its own unique ID, a fault type, a start offset in seconds, a duration, and parameters for that fault.
 
-`Baseline -> Inject -> Record -> Reset`
+The [schema](../scenarios/scenario.schema.json) describes version `1.0`. The [validator](../faultlab/scenario_validator.py) also checks how fields relate to one another. Only the long-running local `server` can be a target. The client generates the workload. Scenarios accept data and the four fault names below. The controller rejects overlapping actions because cleaning up the first fault could undo the second.
 
-The first two integrated live faults are:
+| Fault type | What the action changes |
+| --- | --- |
+| `latency` | Delays outgoing server packets by `latency_ms`, with optional `jitter_ms`. |
+| `packet_loss` | Drops a percentage of outgoing packets according to `loss_percent`. |
+| `disconnect` | Disconnects the server from its Docker networks in both directions. |
+| `process_failure` | Stops the server process using the selected signal. |
 
-1. Server latency using `tc/netem delay`.
-2. Server packet loss using `tc/netem loss`.
+For all four faults, `duration_seconds` controls how long the controller waits after applying the fault before starting cleanup.
 
-Network disconnection and process failure use the same scenario and event
-interfaces but can be demonstrated after the two-fault path is verified.
+## One folder per run
 
-## Scenario Input
+The default path is `results/experiments/<run-id>/`. The ID combines the scenario ID, a UTC timestamp, and eight random hexadecimal characters. Repeating the same scenario produces a new ID. Every event in one run carries that same ID.
 
-- Format: JSON validated against `scenarios/scenario.schema.json`.
-- Schema version: `1.0`.
-- Scope: local Docker services only.
-- Approved fault target: the long-running `server` service. The one-shot client
-  remains a workload generator and is not a version 1.0 fault target.
-- Approved fault types: `latency`, `packet_loss`, `disconnect`, and
-  `process_failure`.
-- Raw commands are never accepted from a scenario.
-- Version 1.0 schedules one fault at a time to make cleanup deterministic.
-- `duration_seconds` is the authoritative outage/fault duration.
+| File | What to look for |
+| --- | --- |
+| `scenario.json` | A copy of the validated input, including the requested start times, durations, and parameters. |
+| `events.jsonl` | One JSON object per line, written as the run progresses. Read events in `sequence` order. |
+| `summary.json` | The run status, dry-run flag, requested and completed action counts, observed timing, and errors. |
 
-Each action has a unique ID, target, start offset, duration, and typed parameter
-object. Target names map to Compose service names through the top-level
-`targets` array.
+Local runs go in `results/`. For a worked example, open the [November 20 trial folders](evidence/fault-safety-2026-11-20/runs/).
 
-## Run Identity and Time
+## Reading the timeline
 
-- Run ID format: `<scenario-id>-<UTC timestamp>-<8 random hex characters>`.
-- Wall-clock timestamps: ISO 8601 in UTC.
-- Schedule offsets and timing drift: monotonic seconds measured from run start.
-- The run ID remains unchanged across every event in one execution.
+Every event includes `sequence`, `timestamp_utc`, `run_id`, `scenario_id`, and `event_type`. The timestamp is an ISO 8601 UTC time. Planned and observed offsets are seconds from the start of the run, measured against a monotonic clock for scheduling.
 
-## Experiment Folder
+On a normal run, look for these events in order:
 
-Each controller run writes:
+1. `run_started` opens the run.
+2. `fault_apply_started` records the action and its parameters. `fault_applied` means the call to apply it has returned.
+3. `fault_cleanup_started` marks the end of the measurement window. `fault_cleaned` records that the adapter finished removing the fault.
+4. `run_completed` closes the run. Check the status in the summary to see whether it passed.
 
-```text
-results/experiments/<run-id>/
-  scenario.json
-  events.jsonl
-  summary.json
-```
+Action events carry whichever of these fields apply: `action_id`, `fault_type`, `target`, `service`, `planned_offset_seconds`, `observed_offset_seconds`, `parameters`, and `error`. Use the observed events to decide whether a request fell inside the fault window. A request sent at the planned start could reach the server before Docker finished applying the fault.
 
-- `scenario.json`: exact validated input used for the run.
-- `events.jsonl`: one JSON event per line, flushed as execution progresses.
-- `summary.json`: final status, action timing, errors, and cleanup results.
+## Interrupted runs and cleanup
 
-Generated experiment folders are ignored by Git. A deliberate sample may be
-copied into project documentation later after team review.
+Fidel's controller handles immediate cleanup. If the event log stops accepting writes or someone presses Ctrl+C, the controller tries to undo active faults before it reports the failure. You may see `emergency_cleanup_completed` or `emergency_cleanup_failed` before `run_failed`. If the disk stopped accepting writes, the event log itself can be incomplete.
 
-## Event Record
+In the summary, `error` gives the primary failure, `cleanup_errors` lists problems undoing a fault, and `logging_errors` lists errors writing the recovery or final events. An interrupted experiment can correctly say `failed` even when its cleanup succeeds.
 
-Every event contains:
+The Docker command timeout defaults to 30 seconds. A command can reach Docker just before the controller loses its reply. If that happens while applying a delay, packet loss, or a process fault, the adapter attempts to undo the change. For a disconnect, it tries to reconnect every original network and restore the service alias, even if one network reconnect fails.
 
-- `sequence`
-- `timestamp_utc`
-- `run_id`
-- `scenario_id`
-- `event_type`
+Use one controller per stack. If the controller is forcibly killed or Docker stops, restore Docker and run `python reset.py`. Dubem's reset rebuilds the server, checks `/health` and `/process`, and verifies that `eth0` has no active `netem` queue.
 
-Action events also contain the applicable values from:
+## Integrating the recorder
 
-- `action_id`
-- `fault_type`
-- `target`
-- `service`
-- `planned_offset_seconds`
-- `observed_offset_seconds`
-- `parameters`
-- `error`
+Dubem owns the baseline, reset, and end-to-end integration. Fidel owns scenario validation, fault timing, and immediate cleanup. Chidera owns observations, replay, and comparison. Keep the event names and run IDs when adding observations so a replay can be traced back to its original run. Discuss changes to a shared field with the people who read it before merging.
 
-Current event types include:
-
-- `run_started`
-- `fault_apply_started`
-- `fault_applied`
-- `fault_cleanup_started`
-- `fault_cleaned`
-- `run_failed`
-- `emergency_cleanup_completed`
-- `emergency_cleanup_failed`
-- `run_completed`
-
-The recorder/replay component may add observation events, but it should retain
-these field names so runs can be compared without conversion.
-
-## Cleanup Ownership
-
-- The scenario controller owns immediate reversal of every fault it applies.
-- Cleanup is attempted in a final recovery path when execution is interrupted.
-- `reset.py` is the final environment-level recovery step.
-- Reset recreates the server, verifies `/health` and `/process`, and confirms
-  that no `netem` qdisc remains on `eth0`.
-- A run is not successful when cleanup cannot be verified.
-
-### Reliability behavior
-
-The controller attempts emergency cleanup in `finally`, before reporting the
-failure. Event-log errors cannot skip this cleanup. `summary.json` includes an
-additive `logging_errors` list; any logging error makes the run fail. Existing
-scenario fields and event names are unchanged. A failure event may follow an
-emergency-cleanup event, so consume `sequence` rather than assuming an order
-between those two event types.
-
-Each Docker subprocess has a 30-second timeout. If a netem or process command
-fails before returning a handle, its adapter attempts rollback itself.
-Interrupted disconnection attempts restore every original network, including
-the network whose command result is uncertain. Reconnection attempts continue
-across networks even when one fails, then report all observed errors.
-
-These are best-effort recovery paths. A killed controller process, stopped
-Docker daemon, or unavailable filesystem can prevent recovery or output.
-`reset.py` remains the fallback after Docker is available again. Run one fault
-controller per stack; cross-process locking is not implemented in version 1.0.
-
-## Team Component Boundaries
-
-- Dubem: baseline workload, Docker environment, health checks, reset, and final
-  component integration.
-- Fidel: scenario validation, fault adapters, timed execution, and immediate
-  cleanup.
-- Chidera: observation recording, replay, and original-versus-replay
-  comparison using the agreed run folder and event fields.
-
-Any interface change should be discussed by all three team members and updated
-here before dependent code is merged.
+OpenAI Codex helped draft this contract on October 22, 2026, and revise it on November 20. The team must review, revise, understand, and document the AI-assisted work it uses for the course.

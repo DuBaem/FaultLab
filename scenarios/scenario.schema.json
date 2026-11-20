@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://faultlab.local/schema/scenario-1.0.json",
   "title": "FaultLab Scenario Version 1.0",
-  "description": "A bounded, local-only fault scenario. This schema validates data and does not execute commands.",
+  "description": "Describes the targets, timing, and settings for a fault in the local FaultLab Docker environment.",
   "type": "object",
   "additionalProperties": false,
   "required": [

@@ -1,127 +1,54 @@
-# Fidel's FaultLab progress as of November 20 2026
+# My fault-control update · November 20, 2026
 
-The scheduled fault-controller implementation is in `main`. This update adds
-reliability fixes, 22 unit tests, measured fault-safety evidence, and a control
-guide on `fidel/fault-reliability`. All 115 tests passed with Docker running.
-Eight live fault trials and a controlled interruption check passed. Team review
-and integration of this branch remain pending.
+**Fidel Anyanwu · Scenario control and fault injection**
 
-## Progress against the saved Gantt
+My part of FaultLab is making sure the server recovers when a fault ends, including when someone stops an experiment halfway through. The four fault types and the controller reached `main` in [PR #3](https://github.com/DuBaem/FaultLab/pull/3). This week I used OpenAI Codex to help change the cleanup code and run the checks in [PR #7](https://github.com/DuBaem/FaultLab/pull/7). The most useful case for our demo is the interrupted run. The experiment stopped early, the controller removed the delay, and the server answered all eight follow-up requests.
 
-The schedule used is `FaultLab_Gantt_Report2_Revised.xlsx`, the saved class
-template revision in the Report 2 materials. Member 2 is Fidel Anyanwu. The
-dates below are its planned task windows, not claimed actual start dates.
+## Where my work stands
 
-| Scheduled work | Planned dates in 2026 | Verified state on November 20 |
+These are the planned dates for member 2 in `FaultLab_Gantt_Report2_Revised.xlsx`. The last column describes what the team can check as of November 20.
+
+| My Gantt task | Planned dates | What I can show the team |
 | --- | --- | --- |
-| Fault interfaces, tc/netem, four adapters, validator/controller | Aug. 31–Oct. 25 | Existing implementation merged through PR #3. Existing tests retained. |
-| Fault/controller integration and regression QA | Oct. 19–Nov. 8 | New regression checks pass alongside the baseline/reset and client/server tests. Branch review remains. |
-| Reliability research and fault safety QA | Nov. 2–22 | Cleanup failure paths hardened. Eight live trials plus interruption recovery pass. Source notes and references prepared below; Fidel's personal reading still needs confirmation. |
-| Fault results analysis and cross-checks | Nov. 16–Dec. 6 | Initial results and raw evidence captured. Broader loss levels, more trials, and team integration remain within this ongoing task. |
-| Fault-control guide and demo rehearsal | Nov. 23–Dec. 13 | Guide prepared early. Presenter rehearsal is still to be completed. |
+| Fault interfaces, four adapters, validator, and controller | Aug. 31–Oct. 25 | PR #3 includes the working controller and all four fault types. |
+| Integration and regression tests | Oct. 19–Nov. 8 | The new cleanup tests run alongside the baseline, reset, client, and server tests. |
+| Reliability research and fault safety checks | Nov. 2–22 | The branch adds 22 tests. The Docker run covers eight regular trials and one interrupted run. I still need to review the sources and code myself. |
+| Compare fault results | Nov. 16–Dec. 6 | I have two trials per fault to start from. More repetitions and lower packet-loss settings are still ahead. |
+| Fault-control guide and demo rehearsal | Nov. 23–Dec. 13 | The [guide](fault-control-guide.md) is ready. My rehearsal is still ahead. |
 
-The group Gantt's dates, colors, member mapping, and report markers have not
-been changed. This update supplies implementation evidence against its tasks.
-It does not establish when earlier work began or remove the remaining weeks.
+## What changed in the controller
 
-## Reliability changes
+One bug could leave a delay active if the controller failed to write the next event to disk. Cleanup now runs in Python's `finally` block, so the controller tries to undo the fault even if writing the log fails. The run summary distinguishes errors writing events from errors removing the fault.
 
-The controller now attempts emergency cleanup in `finally`. A failed event
-write cannot prevent reversal of an active fault. Logging failures are
-reported separately from cleanup failures, and a run with an incomplete event
-log fails. A controller interrupted by `KeyboardInterrupt` attempts cleanup
-before propagating the interruption.
+The other tricky case is a Docker command that times out or gets interrupted. Python can stop the command-line process [2], but Docker may already have changed the container. The adapter now tries to undo that change. After an interrupted disconnect, it tries every original network even if one reconnect attempt fails. Restoring the `server` alias matters because that's the name the client uses [3].
 
-Docker commands now have a 30-second subprocess timeout. If a command fails or
-is interrupted before returning a fault handle, netem/process adapters attempt
-rollback directly. An interrupted network disconnection attempts to reconnect
-every originally attached network. Reconnection continues after an individual
-network error so other networks still get a recovery attempt.
+## What the trials showed
 
-The existing baseline configuration/loading, reset configuration/error handling,
-client/server behavior, tests, and CI checks remain. CI adds the fault-safety
-check and saves its evidence. Scenario version 1.0 and the event field names
-remain unchanged. The summary adds `logging_errors`; the integration contract
-documents this and the failure-event ordering.
+The run lasted from 16:20:40 to 16:22:41 UTC on November 20 using Windows and Docker Desktop. Each trial sent eight requests before the fault, three while it was active, and eight after cleanup. The runner checked each during-fault request against the timestamps in the controller log.
 
-## Measured results
-
-The final safety run took place on November 20, 2026, from 16:20:40 to 16:22:41
-UTC on this Windows/Docker Desktop environment. Two trials were run per fault.
-Each trial used 8 baseline, 3 during-fault, and 8 recovery requests. All
-during-fault samples were checked against the actual event timestamps.
-
-| Fault setting | Observed effect over two trials | Recovery |
+| Fault tested twice | What happened during the fault | After cleanup |
 | --- | --- | --- |
-| 250 ms outgoing delay, no jitter | Mean successful response time was 516.38 and 516.12 ms, versus baseline means of 4.23 and 5.33 ms. All 6 during-fault requests succeeded. | 16/16 requests succeeded. |
-| 100% outgoing packet loss | 6/6 during-fault requests failed. | 16/16 succeeded. |
-| Full network disconnection | 6/6 during-fault requests failed. | 16/16 succeeded using the normal server name. |
-| Process interruption with SIGKILL | 6/6 during-fault requests failed. | 16/16 succeeded after restart. |
+| 250 ms outgoing delay, no jitter | In trial 1, the mean rose from 4.23 ms to 516.38 ms. In trial 2 it went from 5.33 ms to 516.12 ms. All six requests succeeded. | 16 of 16 succeeded. |
+| 100% outgoing packet loss | All six requests failed. | 16 of 16 succeeded. |
+| Full network disconnect | All six requests failed. | 16 of 16 succeeded using the usual server name. |
+| Server stopped with `SIGKILL` | All six requests failed. | 16 of 16 succeeded after restart. |
 
-Across the normal trials, all 64 baseline and 64 recovery requests succeeded.
-Every trial verified cleanup and restored network membership. The additional
-controlled interruption cleaned the active delay and passed 8/8 recovery
-requests. Its controller summary correctly records a failed experiment, because
-the scenario was intentionally interrupted.
+The delay setting applies to packets leaving the server. The client measures the whole HTTP exchange, which helps explain why the times in the table differ from the configured 250 ms [1]. These trials show what happened on this machine. Two trials per fault leave open how much the timing varies, how the workload behaves at partial loss, and how closely a replay matches an original run.
 
-The first measurement prototype used the service name during outages. DNS
-resolution delayed samples beyond the fault window, so four timing checks
-failed even though faults and recovery were observed. The final runner uses
-the pre-fault server IP for before/during measurements, then the service name
-for recovery. The pilot output is retained as `measurement-pilot.json`, rather
-than being relabeled as a successful run.
+**Why the pilot is still in the evidence folder.** The first version used the Docker service name during outages. DNS lookups took long enough that four timing checks missed the fault window. The updated probe uses the server's IP during the fault and its normal name after cleanup. The [pilot report](evidence/fault-safety-2026-11-20/measurement-pilot.json) preserves those four failures so we can explain why the measurement changed.
 
-Two trials and three during-fault samples per trial demonstrate these safety
-cases on this machine. They do not establish performance distributions,
-25% random-loss behavior, or replay reproducibility. Measured HTTP latency
-also must not be treated as the configured delay for a single packet [1].
+## Files behind the results
 
-## Evidence and how to repeat it
+- [Trial table](evidence/fault-safety-2026-11-20/summary.csv) — the quickest way to compare the eight runs.
+- [Full report](evidence/fault-safety-2026-11-20/report.json) — individual requests, pass criteria, and the interruption result. All 64 baseline and 64 recovery requests in the regular trials succeeded.
+- [Regular run logs](evidence/fault-safety-2026-11-20/runs/) and [interrupted run log](evidence/fault-safety-2026-11-20/interrupted/) — use the run ID to find the scenario, event sequence, and summary.
+- [Verification record](evidence/fault-safety-2026-11-20/verification.json) — commands, results, and source checksums for the version tested in [commit 723992e](https://github.com/DuBaem/FaultLab/commit/723992ec6d657baae99d367381decf7d29cdb2fe). All 115 tests passed, the eight trials and interruption check passed, and reset printed `RESET PASSED`.
 
-- [Raw requests and all trial checks](evidence/fault-safety-2026-11-20/report.json)
-- [Compact per-trial results](evidence/fault-safety-2026-11-20/summary.csv)
-- [Verification commands, outcomes, and source checksums](evidence/fault-safety-2026-11-20/verification.json)
-- The same evidence folder includes all nine scenario/event/summary bundles.
-- [Fault-control guide and rehearsal steps](fault-control-guide.md)
+OpenAI Codex executed the automated checks. To repeat them, follow the [setup instructions](../README.md), run `python -m pytest -q`, then `python -m faultlab.safety_check --trials 2`, and finally `python reset.py`.
 
-Repeat from the repository root with Docker Desktop running:
+## What I still need to do
 
-```powershell
-docker compose up -d --build --wait server
-docker compose build baseline
-python -m pytest -q
-python -m faultlab.safety_check --trials 2
-python reset.py
-```
-
-Verified outcomes: 115 tests passed, 8/8 fault trials passed, the interruption
-check passed, and the existing reset printed `RESET PASSED`. These outcomes
-refer to local executions; hosted GitHub Actions results must be checked on
-the pull request.
-
-## Reliability source review notes
-
-Python documents that `subprocess.run(timeout=...)` kills and waits for its
-child on timeout [2]. For FaultLab, that child is the Docker CLI, so its
-termination is not proof that the daemon did not already apply the operation.
-This is the reason for attempting rollback after uncertain command outcomes.
-
-Docker's reconnect command supports a network alias [3]. FaultLab restores the
-`server` alias so normal clients can use the same service address after a
-disconnect. Restoration is checked through a new workload using that name.
-Netem's egress placement and TCP/timer limitations [1] also support measuring
-actual application behavior rather than treating command success as proof of
-an observed impairment.
-
-## Remaining work
-
-1. Review this branch with the team and check hosted CI before merging it.
-2. Continue the scheduled results analysis with additional latency/loss settings
-   and repeated measurements through December 6. Keep the raw results.
-3. Check the fault events and summaries with Chidera's recording/replay work
-   once that component is integrated. This update does not complete her tasks.
-4. Read the sources, review the changed code, and practice the guide. The Gantt
-   rehearsal starts November 23 and is not established by automated test results.
+I'll review the changes with Dubem and Chidera, compare additional latency and loss settings, and check that Chidera's recorder can match its observations to the fault events. For rehearsal, I want to explain from one run why a failed scenario can still leave the server healthy. My own source review, practice, and research hours are separate from the automated results above.
 
 ## References
 
@@ -130,8 +57,3 @@ an observed impairment.
 [2] Python Software Foundation, "subprocess — Subprocess management," *Python 3.12 documentation*. [Online]. Available: https://docs.python.org/3.12/library/subprocess.html. [Accessed: Nov. 20, 2026].
 
 [3] Docker, Inc., "docker network connect," *Docker Docs*. [Online]. Available: https://docs.docker.com/reference/cli/docker/network/connect/. [Accessed: Nov. 20, 2026].
-
-Prepared and checked with OpenAI Codex assistance on November 20, 2026. The
-automated executions above are real. They do not establish student research
-hours, independent authorship, or an oral rehearsal. Retain the course-required
-assistance disclosure when using this material.

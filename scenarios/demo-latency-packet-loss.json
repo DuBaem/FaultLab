@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "scenario_id": "report-two-network-demo",
-  "description": "Demonstrate sequential latency and packet-loss faults against the local server.",
+  "description": "Delay the server's outgoing packets for four seconds, clear the delay, then drop 25% of its outgoing packets for four seconds.",
   "targets": [
     {
       "name": "api-server",
@@ -32,9 +32,9 @@
     }
   ],
   "expected_outcomes": [
-    "Latency rises while the delay rule is active.",
-    "Some requests fail while packet loss is active.",
-    "Each qdisc rule is removed before the next action begins."
+    "The client waits longer for a reply during the delay.",
+    "Dropped packets can slow a request or cause it to time out.",
+    "The server has no delay rule when the loss phase begins, and no loss rule when cleanup finishes."
   ],
   "safety": {
     "scope": "local_docker_only",

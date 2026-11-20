@@ -1,8 +1,7 @@
 """Validate FaultLab scenario files without executing privileged commands.
 
-This Report 1 prototype mirrors the constraints in
-``scenarios/scenario.schema.json`` and adds cross-field safety checks. It does
-not apply network or process faults.
+Check the fields described in ``scenarios/scenario.schema.json`` and how they
+fit together, including whether an action refers to a declared target.
 
 AI-assistance disclosure: the initial scaffold was generated with OpenAI Codex
 on October 4, 2026. Student review, modification, testing, and attribution are

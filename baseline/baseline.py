@@ -7,9 +7,7 @@ from pathlib import Path
 
 import requests
 
-# Relative to the current working directory so this matches both a local run
-# from the repo root and the container, where WORKDIR and the results volume
-# mount both land on "results" under /app.
+# Compose mounts /app/results at ./results so runs are easy to find on the host.
 RESULTS_DIR = Path(os.getenv("RESULTS_DIR", "results"))
 
 
@@ -97,7 +95,7 @@ def run_request(server_url, request_id, value, timeout_s):
     payload = {"request_id": request_id, "value": value}
 
     try:
-        # Start timing immediately before the request so latency reflects the network call only.
+        # Stop the clock when the response arrives, before parsing its JSON.
         start = time.perf_counter()
         response = requests.post(f"{server_url}/process", json=payload, timeout=timeout_s)
         latency_ms = (time.perf_counter() - start) * 1000
@@ -154,7 +152,7 @@ def calculate_summary(results):
         summary["latency_ms"]["max"] = max(latencies)
         summary["latency_ms"]["mean"] = statistics.mean(latencies)
         summary["latency_ms"]["median"] = statistics.median(latencies)
-        # Standard deviation needs at least two data points to mean anything.
+        # Sample standard deviation needs at least two successful timings.
         if len(latencies) >= 2:
             summary["latency_ms"]["stddev"] = statistics.stdev(latencies)
 

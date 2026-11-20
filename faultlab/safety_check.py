@@ -28,8 +28,7 @@ FAULT_PARAMETERS = {
     "disconnect": {"direction": "both"},
     "process_failure": {"signal": "SIGKILL"},
 }
-# Reuse Dubem's baseline validation and statistics without changing its config
-# loading or output format. This runs inside the existing baseline image.
+# The probe runs inside the baseline image so it can check replies the same way as the baseline.
 PROBE_CODE = """
 import json, time, sys
 from datetime import datetime, timezone
@@ -49,12 +48,12 @@ print(json.dumps({'results': results, 'summary': calculate_summary(results)}))
 def make_scenario(fault_type: str, duration: float = 8) -> dict:
     return {
         "schema_version": "1.0", "scenario_id": f"qa-{fault_type.replace('_', '-')}",
-        "description": f"Local safety check for {fault_type}; verify recovery after cleanup.",
+        "description": f"Check how the server responds during {fault_type} and after cleanup.",
         "targets": [{"name": "api-server", "service": "server"}],
         "actions": [{"id": "safety-fault", "type": fault_type, "target": "api-server",
                      "start_after_seconds": 0, "duration_seconds": duration,
                      "parameters": FAULT_PARAMETERS[fault_type]}],
-        "expected_outcomes": ["The impairment is observable and the service recovers."],
+        "expected_outcomes": ["Requests show the effect of the fault, then succeed again after cleanup."],
         "safety": {"scope": "local_docker_only", "cleanup_required": True,
                    "max_total_duration_seconds": 30},
     }
@@ -62,7 +61,7 @@ def make_scenario(fault_type: str, duration: float = 8) -> dict:
 
 def evaluate_trial(fault_type: str, before: dict, during: dict, after: dict,
                    run: dict, fault_window: tuple[str, str], clean: bool) -> dict:
-    """Judge observed effects, not just whether an injection command returned 0."""
+    """Check what the client experienced during the fault and after cleanup."""
     def all_succeeded(batch):
         results = batch["results"]
         return bool(results) and all(row["success"] for row in results)
@@ -177,7 +176,7 @@ def run_checks(trials: int, results_dir: Path) -> tuple[Path, dict]:
                 after = measure(docker, probe, 8)
                 events = [json.loads(line) for line in
                           (output / "runs" / run["run_id"] / "events.jsonl").read_text().splitlines()]
-                # End the measurement window BEFORE cleanup starts, not after it ends.
+                # Once cleanup starts, a request may already see a recovering server.
                 window = tuple(next(e["timestamp_utc"] for e in events if e["event_type"] == kind)
                                for kind in ("fault_applied", "fault_cleanup_started"))
                 evaluation = evaluate_trial(fault_type, before, during, after, run, window, clean)
@@ -235,9 +234,13 @@ def run_checks(trials: int, results_dir: Path) -> tuple[Path, dict]:
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--trials", type=int, choices=range(1, 6), default=2)
-    parser.add_argument("--results-dir", type=Path, default=Path("results/fault-safety"))
+    parser = argparse.ArgumentParser(
+        description="Measure requests before, during, and after faults on the local FaultLab server."
+    )
+    parser.add_argument("--trials", type=int, choices=range(1, 6), default=2,
+                        help="how many times to run each of the four faults (default: 2)")
+    parser.add_argument("--results-dir", type=Path, default=Path("results/fault-safety"),
+                        help="where to save the trial table, request details, and event logs")
     args = parser.parse_args(argv)
     output, report = run_checks(args.trials, args.results_dir)
     print(f"Fault safety {'PASSED' if report['passed'] else 'FAILED'}: {output}")

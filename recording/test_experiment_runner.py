@@ -239,5 +239,53 @@ class TestExperimentRunner(unittest.TestCase):
             )
         )
 
+    @patch("recording.experiment_runner.execute_scenario")
+    @patch("recording.experiment_runner.run_request")
+    def test_slow_controller_gets_recovery_observations(
+        self, mock_request, mock_controller
+    ):
+        controller_done = threading.Event()
+        requests_after_controller = []
+
+        def fake_request(server_url, request_id, value, timeout_s):
+            if controller_done.is_set():
+                requests_after_controller.append(request_id)
+
+            return {
+                "request_id": request_id,
+                "success": True,
+                "latency_ms": 1.0,
+                "error": None,
+            }
+
+        def fake_controller(scenario, **kwargs):
+            time.sleep(0.15)
+            controller_done.set()
+
+            run_dir = self.results_dir / "slow-controller-test"
+            run_dir.mkdir(parents=True, exist_ok=True)
+
+            return {
+                "run_id": "slow-controller-test",
+                "status": "passed",
+            }
+
+        mock_request.side_effect = fake_request
+        mock_controller.side_effect = fake_controller
+
+        result = run_experiment(
+            {"scenario_id": "slow-controller-test"},
+            "http://localhost:5000",
+            request_count=100,
+            request_interval=0.01,
+            observation_duration=0.05,
+            recovery_seconds=0.1,
+            results_dir=self.results_dir,
+            dry_run=True,
+        )
+
+        self.assertEqual(result["workload_errors"], [])
+        self.assertGreater(len(requests_after_controller), 0)
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "scenario_id": "server-process-failure-demo",
-  "description": "Stop the local server process with SIGTERM and restart it after a bounded interval.",
+  "description": "Stop the local server process with SIGKILL and restart it after a bounded interval.",
   "targets": [
     {
       "name": "api-server",
@@ -16,7 +16,7 @@
       "start_after_seconds": 1,
       "duration_seconds": 5,
       "parameters": {
-        "signal": "SIGTERM",
+        "signal": "SIGKILL",
         "restart_after_seconds": 5
       }
     }

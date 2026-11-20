@@ -52,6 +52,8 @@ def run_experiment(
     start_signal = threading.Event()
     stop_signal = threading.Event()
     workload_finished = threading.Event()
+    controller_finished=threading.Event()
+    recovery_deadline = None
 
     experiment_start = time.perf_counter()
 
@@ -65,12 +67,16 @@ def run_experiment(
 
                 elapsed = time.perf_counter() - experiment_start
 
-                if (
-                    observation_duration is not None
-                    and elapsed >= observation_duration
-                ):
-                    break
+                if observation_duration is not None:
+                    minimum_elapsed = elapsed >= observation_duration
+                    recovery_complete = (
+                        controller_finished.is_set()
+                        and recovery_deadline is not None
+                        and time.perf_counter() >= recovery_deadline
+                    )
 
+                    if minimum_elapsed and recovery_complete:
+                        break
                 request_id = f"request-{i:04d}"
                 started_at = datetime.now(timezone.utc).isoformat()
 
@@ -123,9 +129,10 @@ def run_experiment(
         if observation_duration is None:
             workload_finished.wait(timeout=recovery_seconds)
         else:
-            workload_finished.wait(
-                timeout=observation_duration + request_timeout + 1
-            )
+            recovery_deadline = time.perf_counter() + recovery_seconds
+            controller_finished.set()
+
+            workload_finished.wait()
 
     finally:
         stop_signal.set()

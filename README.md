@@ -118,6 +118,4 @@ We work on individual branches, test our changes, and open a pull request for a 
 
 ## Development assistance disclosure
 
-On October 4, 2026, OpenAI Codex generated the initial scenario-validator scaffold, examples, tests, and related README text. On October 22 it helped develop the fault adapters, controller, additional examples, and tests. On November 20 it helped develop and test the reliability changes, safety runner, CI updates, and related documentation, and helped edit the project's written material.
-
-For course credit, each student must personally review, revise, test, understand, and credit the AI-assisted material they use. The saved runs document automated checks. Personal research hours and demo rehearsal are recorded separately when completed.
+On October 4, 2026, Codex generated the initial scenario-validator. On October 22, it helped develop the fault adapters, controller, and tests. On November 20 it helped develop and test the reliability changes.

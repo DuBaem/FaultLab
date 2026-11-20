@@ -1,0 +1,9 @@
+trial,fault_type,run_id,passed,baseline_mean_ms,during_success_mean_ms,during_failures,during_sample_count,recovery_successes,recovery_requests
+1,latency,qa-latency-20261120T162043Z-a3a17cca,True,4.2279436249827995,516.3813056666792,0,3,8,8
+1,packet_loss,qa-packet-loss-20261120T162057Z-1839c387,True,5.433087999996644,,3,3,8,8
+1,disconnect,qa-disconnect-20261120T162110Z-91e150d4,True,4.29644262500517,,3,3,8,8
+1,process_failure,qa-process-failure-20261120T162123Z-f7a423ca,True,5.304706250008451,,3,3,8,8
+2,latency,qa-latency-20261120T162142Z-10882077,True,5.332823000003373,516.1175293333334,0,3,8,8
+2,packet_loss,qa-packet-loss-20261120T162155Z-e3d43dad,True,5.000440124995009,,3,3,8,8
+2,disconnect,qa-disconnect-20261120T162208Z-baa1c240,True,5.630851375002521,,3,3,8,8
+2,process_failure,qa-process-failure-20261120T162220Z-ef94411b,True,5.2129996250016575,,3,3,8,8

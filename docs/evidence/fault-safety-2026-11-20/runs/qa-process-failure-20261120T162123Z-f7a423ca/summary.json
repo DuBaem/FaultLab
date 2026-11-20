@@ -1,0 +1,29 @@
+{
+  "run_id": "qa-process-failure-20261120T162123Z-f7a423ca",
+  "scenario_id": "qa-process-failure",
+  "status": "passed",
+  "dry_run": false,
+  "started_at": "2026-11-20T16:21:23.813869+00:00",
+  "finished_at": "2026-11-20T16:21:39.055637+00:00",
+  "actions_completed": 1,
+  "actions_requested": 1,
+  "actions": [
+    {
+      "action_id": "safety-fault",
+      "fault_type": "process_failure",
+      "target": "api-server",
+      "service": "server",
+      "planned_start_seconds": 0.0,
+      "observed_start_seconds": 0.7386099000141257,
+      "start_drift_seconds": 0.7386099000141257,
+      "planned_end_seconds": 8.0,
+      "observed_end_seconds": 15.236357500005397,
+      "cleanup_verified": true
+    }
+  ],
+  "cleanup_errors": [],
+  "logging_errors": [],
+  "error": null,
+  "event_log": "events.jsonl",
+  "scenario_snapshot": "scenario.json"
+}

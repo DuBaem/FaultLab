@@ -136,15 +136,23 @@ def execute_scenario(
     active: list[FaultHandle] = []
     action_results: list[dict[str, Any]] = []
     failure: BaseException | None = None
+    logging_errors: list[str] = []
+    cleanup_errors: list[str] = []
 
-    journal.emit(
-        "run_started",
-        description=document["description"],
-        dry_run=time_scale == 0,
-        action_count=len(document["actions"]),
-    )
+    def recovery_event(event_type: str, **fields: Any) -> None:
+        # An unavailable event file must never prevent reversing an active fault.
+        try:
+            journal.emit(event_type, **fields)
+        except Exception as exc:
+            logging_errors.append(f"{event_type}: {type(exc).__name__}: {exc}")
 
     try:
+        journal.emit(
+            "run_started",
+            description=document["description"],
+            dry_run=time_scale == 0,
+            action_count=len(document["actions"]),
+        )
         actions = sorted(
             document["actions"], key=lambda action: float(action["start_after_seconds"])
         )
@@ -222,30 +230,28 @@ def execute_scenario(
 
     except BaseException as exc:
         failure = exc
-        journal.emit("run_failed", error_type=type(exc).__name__, error=str(exc))
+    finally:
+        # Cleanup precedes error reporting, including after Ctrl+C or disk errors.
+        for handle in reversed(active):
+            try:
+                executor.cleanup(handle)
+            except BaseException as exc:
+                cleanup_errors.append(f"{handle.action_id}: {type(exc).__name__}: {exc}")
+                if failure is None:
+                    failure = exc
+                recovery_event(
+                    "emergency_cleanup_failed", action_id=handle.action_id,
+                    fault_type=handle.fault_type, service=handle.service, error=str(exc),
+                )
+            else:
+                recovery_event(
+                    "emergency_cleanup_completed", action_id=handle.action_id,
+                    fault_type=handle.fault_type, service=handle.service,
+                )
+    if failure is not None:
+        recovery_event("run_failed", error_type=type(failure).__name__, error=str(failure))
 
-    cleanup_errors: list[str] = []
-    for handle in reversed(active):
-        try:
-            executor.cleanup(handle)
-            journal.emit(
-                "emergency_cleanup_completed",
-                action_id=handle.action_id,
-                fault_type=handle.fault_type,
-                service=handle.service,
-            )
-        except Exception as exc:
-            message = f"{handle.action_id}: {exc}"
-            cleanup_errors.append(message)
-            journal.emit(
-                "emergency_cleanup_failed",
-                action_id=handle.action_id,
-                fault_type=handle.fault_type,
-                service=handle.service,
-                error=str(exc),
-            )
-
-    status = "passed" if failure is None and not cleanup_errors else "failed"
+    status = "passed" if failure is None and not cleanup_errors and not logging_errors else "failed"
     finished_utc = now()
     summary = {
         "run_id": run_id,
@@ -258,20 +264,26 @@ def execute_scenario(
         "actions_requested": len(document["actions"]),
         "actions": action_results,
         "cleanup_errors": cleanup_errors,
+        "logging_errors": logging_errors,
         "error": str(failure) if failure else None,
         "event_log": "events.jsonl",
         "scenario_snapshot": "scenario.json",
     }
     summary_path = run_dir / "summary.json"
     summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
-    journal.emit("run_completed", status=status, summary="summary.json")
+    recovery_event("run_completed", status=status, summary="summary.json")
+    if logging_errors:
+        summary["status"] = "failed"
+        summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
 
     if failure is not None:
-        if isinstance(failure, KeyboardInterrupt):
+        if not isinstance(failure, Exception):
             raise failure
         raise ScenarioExecutionError(str(failure), summary_path) from failure
     if cleanup_errors:
         raise ScenarioExecutionError("One or more cleanup operations failed.", summary_path)
+    if logging_errors:
+        raise ScenarioExecutionError("The event log could not be completed.", summary_path)
     return summary
 
 

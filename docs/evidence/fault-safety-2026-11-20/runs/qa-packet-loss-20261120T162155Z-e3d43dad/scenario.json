@@ -1,0 +1,31 @@
+{
+  "actions": [
+    {
+      "duration_seconds": 8,
+      "id": "safety-fault",
+      "parameters": {
+        "loss_percent": 100
+      },
+      "start_after_seconds": 0,
+      "target": "api-server",
+      "type": "packet_loss"
+    }
+  ],
+  "description": "Local safety check for packet_loss; verify recovery after cleanup.",
+  "expected_outcomes": [
+    "The impairment is observable and the service recovers."
+  ],
+  "safety": {
+    "cleanup_required": true,
+    "max_total_duration_seconds": 30,
+    "scope": "local_docker_only"
+  },
+  "scenario_id": "qa-packet-loss",
+  "schema_version": "1.0",
+  "targets": [
+    {
+      "name": "api-server",
+      "service": "server"
+    }
+  ]
+}

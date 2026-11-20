@@ -106,6 +106,26 @@ these field names so runs can be compared without conversion.
   that no `netem` qdisc remains on `eth0`.
 - A run is not successful when cleanup cannot be verified.
 
+### Reliability behavior
+
+The controller attempts emergency cleanup in `finally`, before reporting the
+failure. Event-log errors cannot skip this cleanup. `summary.json` includes an
+additive `logging_errors` list; any logging error makes the run fail. Existing
+scenario fields and event names are unchanged. A failure event may follow an
+emergency-cleanup event, so consume `sequence` rather than assuming an order
+between those two event types.
+
+Each Docker subprocess has a 30-second timeout. If a netem or process command
+fails before returning a handle, its adapter attempts rollback itself.
+Interrupted disconnection attempts restore every original network, including
+the network whose command result is uncertain. Reconnection attempts continue
+across networks even when one fails, then report all observed errors.
+
+These are best-effort recovery paths. A killed controller process, stopped
+Docker daemon, or unavailable filesystem can prevent recovery or output.
+`reset.py` remains the fallback after Docker is available again. Run one fault
+controller per stack; cross-process locking is not implemented in version 1.0.
+
 ## Team Component Boundaries
 
 - Dubem: baseline workload, Docker environment, health checks, reset, and final

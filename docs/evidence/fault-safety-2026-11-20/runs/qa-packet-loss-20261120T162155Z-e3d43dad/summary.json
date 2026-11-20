@@ -1,0 +1,29 @@
+{
+  "run_id": "qa-packet-loss-20261120T162155Z-e3d43dad",
+  "scenario_id": "qa-packet-loss",
+  "status": "passed",
+  "dry_run": false,
+  "started_at": "2026-11-20T16:21:55.973284+00:00",
+  "finished_at": "2026-11-20T16:22:05.208131+00:00",
+  "actions_completed": 1,
+  "actions_requested": 1,
+  "actions": [
+    {
+      "action_id": "safety-fault",
+      "fault_type": "packet_loss",
+      "target": "api-server",
+      "service": "server",
+      "planned_start_seconds": 0.0,
+      "observed_start_seconds": 0.34415269999590237,
+      "start_drift_seconds": 0.34415269999590237,
+      "planned_end_seconds": 8.0,
+      "observed_end_seconds": 9.229814799997257,
+      "cleanup_verified": true
+    }
+  ],
+  "cleanup_errors": [],
+  "logging_errors": [],
+  "error": null,
+  "event_log": "events.jsonl",
+  "scenario_snapshot": "scenario.json"
+}

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 from faultlab.docker_cli import DockerCompose, NetworkAttachment
 
@@ -39,6 +39,7 @@ class FaultExecutor:
         fault_type = str(action["type"])
         action_id = str(action["id"])
         parameters = action["parameters"]
+        handle = FaultHandle(action_id, fault_type, service)
 
         if fault_type == "latency":
             latency = _format_number(parameters["latency_ms"])
@@ -56,14 +57,14 @@ class FaultExecutor:
             jitter = parameters.get("jitter_ms", 0)
             if float(jitter) > 0:
                 command.append(f"{_format_number(jitter)}ms")
-            self.docker.exec(service, command)
+            self._apply_reversible(handle, lambda: self.docker.exec(service, command))
 
         elif fault_type == "packet_loss":
             loss = _format_number(parameters["loss_percent"])
-            self.docker.exec(
+            self._apply_reversible(handle, lambda: self.docker.exec(
                 service,
                 ["tc", "qdisc", "replace", "dev", "eth0", "root", "netem", "loss", f"{loss}%"],
-            )
+            ))
 
         elif fault_type == "disconnect":
             if parameters["direction"] != "both":
@@ -72,12 +73,27 @@ class FaultExecutor:
             return FaultHandle(action_id, fault_type, service, attachment)
 
         elif fault_type == "process_failure":
-            self.docker.kill(service, parameters["signal"])
+            self._apply_reversible(handle, lambda: self.docker.kill(service, parameters["signal"]))
 
         else:
             raise ValueError(f"unsupported fault type: {fault_type}")
 
-        return FaultHandle(action_id, fault_type, service)
+        return handle
+
+    def _apply_reversible(self, handle: FaultHandle, operation: Callable[[], Any]) -> None:
+        try:
+            operation()
+        except BaseException as exc:
+            # The controller has not received this handle yet. A command can have
+            # changed Docker before a timeout or Ctrl+C reaches the Python caller.
+            try:
+                self.cleanup(handle)
+            except BaseException as recovery_error:
+                raise RuntimeError(
+                    f"Applying {handle.action_id!r} failed ({type(exc).__name__}: {exc}); "
+                    f"rollback failed: {recovery_error}. Run reset.py."
+                ) from exc
+            raise
 
     def cleanup(self, handle: FaultHandle) -> None:
         """Reverse one fault. Calling cleanup twice is harmless."""

@@ -1,0 +1,29 @@
+{
+  "run_id": "qa-disconnect-20261120T162110Z-91e150d4",
+  "scenario_id": "qa-disconnect",
+  "status": "passed",
+  "dry_run": false,
+  "started_at": "2026-11-20T16:21:10.421527+00:00",
+  "finished_at": "2026-11-20T16:21:19.282012+00:00",
+  "actions_completed": 1,
+  "actions_requested": 1,
+  "actions": [
+    {
+      "action_id": "safety-fault",
+      "fault_type": "disconnect",
+      "target": "api-server",
+      "service": "server",
+      "planned_start_seconds": 0.0,
+      "observed_start_seconds": 0.650480600001174,
+      "start_drift_seconds": 0.650480600001174,
+      "planned_end_seconds": 8.0,
+      "observed_end_seconds": 8.8545199999935,
+      "cleanup_verified": true
+    }
+  ],
+  "cleanup_errors": [],
+  "logging_errors": [],
+  "error": null,
+  "event_log": "events.jsonl",
+  "scenario_snapshot": "scenario.json"
+}

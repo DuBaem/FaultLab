@@ -10,7 +10,9 @@ The project is designed to test how a client-server application behaves under co
 
 ## Current Status
 
-The initial client-server test environment is working.
+The client/server environment, baseline/reset workflow, and four-fault scenario
+controller are implemented. The fault-safety runner checks observed effects,
+cleanup, and recovery. Recording/replay integration remains separate work.
 
 For a detailed reference of the server/client/baseline/reset contracts (request/response shapes, env vars, exit codes), see [docs/INTEGRATION.md](docs/INTEGRATION.md).
 
@@ -34,6 +36,26 @@ For a detailed reference of the server/client/baseline/reset contracts (request/
 - Run IDs, planned and observed timestamps, JSONL event logs, and summary bundles
 - Valid, invalid, and two-fault demonstration scenarios
 - Unit tests for validation, command construction, timing, and failure cleanup
+- Cleanup after event-log failures, interrupted application, and partial disconnection
+- Docker command timeouts and a repeatable live fault-safety check
+
+### Verify fault safety
+
+Start Docker Desktop, then run these commands from the repository root:
+
+```powershell
+docker compose up -d --build --wait server
+docker compose build baseline
+python -m pytest tests/
+python -m faultlab.safety_check --trials 2
+```
+
+The last command temporarily impairs only the local `server` and takes several
+minutes. Run it without another controller or experiment using this stack. It
+writes raw request results, controller bundles, checks, and a CSV summary under
+`results/fault-safety/`. Exit code 0 requires all checks to pass. See the
+[fault-control guide](docs/fault-control-guide.md) and
+[November 20 progress and evidence](docs/fidel-progress-2026-11-20.md).
 
 ### Successful Test
 
@@ -277,6 +299,11 @@ Most tests run without Docker at all, by checking the baseline logic directly (s
 ## Development Assistance Disclosure
 
 The initial scenario-validation scaffold, examples, tests, and related README text were generated with OpenAI Codex on October 4, 2026. The fault adapters, controller, additional examples, and tests were AI-assisted with OpenAI Codex on October 22, 2026. Under the course policy, this material must be treated as AI-assisted work rather than an original student artifact. A student must personally review, modify, test, understand, and accurately document any portion retained in the project.
+
+The reliability fixes, added regression tests, fault-safety runner, CI additions,
+and related documentation were developed and tested with OpenAI Codex on
+November 20, 2026. The saved automated results document those executions, not
+student research hours, independent authorship, or a completed oral rehearsal.
 
 ## Team Responsibilities
 

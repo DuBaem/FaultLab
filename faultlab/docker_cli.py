@@ -7,6 +7,7 @@ been validated.
 
 from __future__ import annotations
 
+import math
 import subprocess
 import time
 from dataclasses import dataclass
@@ -50,11 +51,15 @@ class DockerCompose:
         runner: CommandRunner = subprocess.run,
         monotonic: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] = time.sleep,
+        command_timeout_seconds: float = 30,
     ) -> None:
         self.project_root = project_root or Path(__file__).resolve().parents[1]
         self._runner = runner
         self._monotonic = monotonic
         self._sleep = sleep
+        if not math.isfinite(command_timeout_seconds) or command_timeout_seconds <= 0:
+            raise ValueError("command_timeout_seconds must be finite and positive")
+        self.command_timeout_seconds = command_timeout_seconds
 
     @staticmethod
     def _validate_service(service: str) -> None:
@@ -74,7 +79,13 @@ class DockerCompose:
                 cwd=self.project_root,
                 capture_output=True,
                 text=True,
+                timeout=self.command_timeout_seconds,
             )
+        except subprocess.TimeoutExpired as exc:
+            raise RuntimeError(
+                f"Docker command timed out after {self.command_timeout_seconds:g} seconds: "
+                f"{' '.join(command)}"
+            ) from exc
         except FileNotFoundError as exc:
             raise RuntimeError(
                 "Docker could not be started. Install Docker Desktop and make sure "
@@ -174,17 +185,19 @@ class DockerCompose:
         if not networks:
             raise RuntimeError(f"service {service!r} has no attached Docker network")
 
-        disconnected: list[str] = []
         try:
             for network in networks:
                 self.docker(["network", "disconnect", network, container_id])
-                disconnected.append(network)
-        except Exception:
-            for network in disconnected:
-                self.docker(
-                    ["network", "connect", "--alias", service, network, container_id],
-                    check=False,
-                )
+        except BaseException as exc:
+            # A command may take effect before its client is interrupted. Restore
+            # every original network, including the one whose result is uncertain.
+            try:
+                self.reconnect(NetworkAttachment(container_id, service, networks))
+            except BaseException as recovery_error:
+                raise RuntimeError(
+                    f"Disconnect failed ({type(exc).__name__}: {exc}); "
+                    f"network rollback failed: {recovery_error}. Run reset.py."
+                ) from exc
             raise
 
         return NetworkAttachment(container_id, service, networks)
@@ -192,30 +205,25 @@ class DockerCompose:
     def reconnect(self, attachment: NetworkAttachment) -> None:
         """Reconnect a service and restore its Compose service-name alias."""
 
+        errors: list[str] = []
         for network in attachment.networks:
-            result = self.docker(
-                [
-                    "network",
-                    "connect",
-                    "--alias",
-                    attachment.service,
-                    network,
-                    attachment.container_id,
-                ],
-                check=False,
-            )
+            try:
+                result = self.docker(
+                    [
+                        "network", "connect", "--alias", attachment.service,
+                        network, attachment.container_id,
+                    ],
+                    check=False,
+                )
+            except Exception as exc:
+                errors.append(f"{network}: {exc}")
+                continue
             detail = f"{result.stdout}\n{result.stderr}".lower()
             already_connected = "already exists" in detail or "already connected" in detail
             if result.returncode != 0 and not already_connected:
-                raise DockerCommandError(
-                    [
-                        "docker",
-                        "network",
-                        "connect",
-                        "--alias",
-                        attachment.service,
-                        network,
-                        attachment.container_id,
-                    ],
-                    result,
-                )
+                errors.append(str(DockerCommandError(
+                    ["docker", "network", "connect", "--alias", attachment.service,
+                     network, attachment.container_id], result,
+                )))
+        if errors:
+            raise RuntimeError("Network reconnection failed: " + "; ".join(errors))

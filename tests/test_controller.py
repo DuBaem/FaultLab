@@ -8,8 +8,9 @@ import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
+from unittest.mock import patch
 
-from faultlab.controller import ScenarioExecutionError, execute_scenario
+from faultlab.controller import EventJournal, ScenarioExecutionError, execute_scenario
 from faultlab.fault_adapters import DryRunFaultExecutor
 from faultlab.scenario_validator import ScenarioValidationError
 
@@ -110,6 +111,80 @@ class ScenarioControllerTests(unittest.TestCase):
             self.assertEqual("failed", summary["status"])
             self.assertEqual(1, len(executor.cleaned))
             self.assertTrue(executor.cleaned[0].cleaned)
+
+    def test_persistent_journal_failure_cannot_skip_fault_cleanup(self) -> None:
+        scenario = load_scenario("valid-latency.json")
+        scenario["actions"][0]["start_after_seconds"] = 0
+        executor = DryRunFaultExecutor()
+        real_emit = EventJournal.emit
+
+        def failing_emit(journal, event_type, **fields):
+            if executor.applied:
+                raise OSError("event disk unavailable")
+            return real_emit(journal, event_type, **fields)
+
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(EventJournal, "emit", failing_emit):
+                with self.assertRaises(ScenarioExecutionError) as raised:
+                    execute_scenario(scenario, executor=executor,
+                                     results_dir=Path(directory), time_scale=0)
+            self.assertEqual(1, len(executor.cleaned))
+            summary = json.loads(raised.exception.summary_path.read_text())
+            self.assertEqual("failed", summary["status"])
+            self.assertEqual([], summary["cleanup_errors"])
+            self.assertTrue(summary["logging_errors"])
+
+    def test_keyboard_interrupt_cleans_fault_before_propagating(self) -> None:
+        scenario = load_scenario("valid-latency.json")
+        scenario["actions"][0]["start_after_seconds"] = 0
+        executor = DryRunFaultExecutor()
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaises(KeyboardInterrupt):
+                execute_scenario(scenario, executor=executor,
+                                 results_dir=Path(directory),
+                                 sleep=lambda _: (_ for _ in ()).throw(KeyboardInterrupt()))
+            self.assertEqual(1, len(executor.cleaned))
+            summary = json.loads(next(Path(directory).glob("*/summary.json")).read_text())
+            self.assertEqual("failed", summary["status"])
+
+    def test_cleanup_failure_is_recorded_even_when_error_logging_fails(self) -> None:
+        scenario = load_scenario("valid-latency.json")
+        scenario["actions"][0]["start_after_seconds"] = 0
+        executor = DryRunFaultExecutor()
+        real_emit = EventJournal.emit
+
+        def failing_emit(journal, event_type, **fields):
+            if event_type in {"run_failed", "emergency_cleanup_failed"}:
+                raise OSError("event disk unavailable")
+            return real_emit(journal, event_type, **fields)
+
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(executor, "cleanup", side_effect=RuntimeError("cleanup unavailable")):
+                with patch.object(EventJournal, "emit", failing_emit):
+                    with self.assertRaises(ScenarioExecutionError) as raised:
+                        execute_scenario(scenario, executor=executor,
+                                         results_dir=Path(directory), time_scale=0)
+            summary = json.loads(raised.exception.summary_path.read_text())
+            self.assertEqual("failed", summary["status"])
+            self.assertIn("cleanup unavailable", summary["cleanup_errors"][0])
+
+    def test_completion_log_failure_does_not_claim_a_pass(self) -> None:
+        real_emit = EventJournal.emit
+
+        def failing_emit(journal, event_type, **fields):
+            if event_type == "run_completed":
+                raise OSError("completion write failed")
+            return real_emit(journal, event_type, **fields)
+
+        with tempfile.TemporaryDirectory() as directory:
+            with patch.object(EventJournal, "emit", failing_emit):
+                with self.assertRaises(ScenarioExecutionError) as raised:
+                    execute_scenario(load_scenario("valid-latency.json"),
+                                     executor=DryRunFaultExecutor(),
+                                     results_dir=Path(directory), time_scale=0)
+            summary = json.loads(raised.exception.summary_path.read_text())
+            self.assertEqual("failed", summary["status"])
+            self.assertEqual(1, summary["actions_completed"])
 
 
 if __name__ == "__main__":

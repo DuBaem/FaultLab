@@ -1,0 +1,44 @@
+{
+  "verified_date": "2026-11-20",
+  "base_commit": "5b23088ba736562713e4a2a8537081dc45c90810",
+  "pytest": {
+    "command": "python -m pytest -q",
+    "passed": 115,
+    "failed": 0,
+    "skipped": 0,
+    "duration_seconds": 2.15
+  },
+  "fault_safety": {
+    "command": "python -m faultlab.safety_check --trials 2",
+    "passed_trials": 8,
+    "requested_trials": 8,
+    "controlled_interruption_passed": true
+  },
+  "reset": {
+    "command": "python reset.py",
+    "exit_code": 0,
+    "message": "RESET PASSED"
+  },
+  "assistance": "OpenAI Codex performed these automated checks; not a record of student rehearsal or independent work hours.",
+  "source_hash_format": "SHA-256 of UTF-8 source with CRLF normalized to LF",
+  "source_hashes": {
+    "faultlab/__init__.py": "c2bd4d88a103998a7cdbfbb60e2cc4d2ac33febe250ae091e1ed6a831a89e218",
+    "faultlab/controller.py": "9636adb27d2cafe201494a9d835b269c95e58112c938df12049b08b49fcfe402",
+    "faultlab/docker_cli.py": "1cde9284db584ae12726eddd1b163ceae9418655133bb24873ac5bdafc1da71a",
+    "faultlab/fault_adapters.py": "a5dfa38d3395d7faf07fe9e462db3a9d2acbb9b2dec09dc3415de086f4a47ed8",
+    "faultlab/safety_check.py": "8527c3814aa8500b65f0fdec9bc65a6829b8b59db2e66e6b7a220b7141915ed3",
+    "faultlab/scenario_validator.py": "953a3abe5a495369fd5e276d0f2b0ba7d997238847cd38eb63acf99f4983a818",
+    "tests/__init__.py": "750eadf4cb10272b4e36c685eea6f436d7f1ea24ef019851462fdb268e1483a6",
+    "tests/conftest.py": "36007a4db5d15bf981d25e9f51a64984a8e777ca28533fe5dd8112f65614b650",
+    "tests/test_baseline.py": "241c40479747488dc54c89ae5cb3ac6e556a079cbb3adea4e2efd5a90ef6687b",
+    "tests/test_client.py": "4a4fee656d7b3470bb5784977349f76a68196262eeac34b3ef2706a92e1eb19b",
+    "tests/test_controller.py": "a06ee0333a5e13581de26394762ef9acef106e752b6c3dc472d8f9e709038db9",
+    "tests/test_docker_cli.py": "998ed337b36856e6f31d13245dacf0c5440badfc338d6b3164b2629e18f09394",
+    "tests/test_fault_adapters.py": "74f90965622087c202ea26026346f4a7ed2664dd89cf21015f883bfe1df71524",
+    "tests/test_integration.py": "8f262c542490320546d9e1b348314b1e80ca141a345b3ecd35cf83e21b420f0a",
+    "tests/test_reset.py": "0cb2f7a1d3b76b7908fa17935e9766c48425545f4c3cc6190c023a6ab1d4206c",
+    "tests/test_safety_check.py": "97841f64781bd0a3311fe72fa700de99acad26a398d70d97a03d5dbbc2cd1e59",
+    "tests/test_scenario_validator.py": "bc3f8de909a9f2595922b260870c2f2817cd0c1be461a1b02bbcee1212425fcb",
+    "tests/test_server.py": "6b9cf2be9fba504b7d6f5d30e24816b2955104fe894e908302ab8986f4d6ff9d"
+  }
+}

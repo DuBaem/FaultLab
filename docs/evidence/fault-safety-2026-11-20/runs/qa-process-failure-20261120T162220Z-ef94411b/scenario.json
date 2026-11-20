@@ -1,0 +1,31 @@
+{
+  "actions": [
+    {
+      "duration_seconds": 8,
+      "id": "safety-fault",
+      "parameters": {
+        "signal": "SIGKILL"
+      },
+      "start_after_seconds": 0,
+      "target": "api-server",
+      "type": "process_failure"
+    }
+  ],
+  "description": "Local safety check for process_failure; verify recovery after cleanup.",
+  "expected_outcomes": [
+    "The impairment is observable and the service recovers."
+  ],
+  "safety": {
+    "cleanup_required": true,
+    "max_total_duration_seconds": 30,
+    "scope": "local_docker_only"
+  },
+  "scenario_id": "qa-process-failure",
+  "schema_version": "1.0",
+  "targets": [
+    {
+      "name": "api-server",
+      "service": "server"
+    }
+  ]
+}

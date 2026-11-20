@@ -32,6 +32,7 @@ jobs:
           tests/test_docker_cli.py
           tests/test_fault_adapters.py
           tests/test_controller.py
+          tests/test_safety_check.py
           -v
 
   docker-smoke:
@@ -65,6 +66,17 @@ jobs:
 
       - name: Run a small containerized baseline workload
         run: docker compose run --rm --build -e BASELINE_REQUESTS=5 baseline
+
+      - name: Verify fault effects, cleanup, and recovery
+        run: python -m faultlab.safety_check --trials 1
+
+      - name: Save fault safety evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fault-safety-evidence
+          path: results/fault-safety/
+          if-no-files-found: ignore
 
       - name: Tear down Docker
         if: always()

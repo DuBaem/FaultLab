@@ -59,6 +59,13 @@ class DockerCompose:
         if not math.isfinite(command_timeout_seconds) or command_timeout_seconds <= 0:
             raise ValueError("command_timeout_seconds must be finite and positive")
         self.command_timeout_seconds = command_timeout_seconds
+        self._server_id: str | None = None
+
+    def bind_server(self) -> str:
+        """Resolve Compose's server once before starting the scenario clock."""
+        self._server_id = None
+        self._server_id = self.container_id("server")
+        return self._server_id
 
     @staticmethod
     def _validate_service(service: str) -> None:
@@ -119,6 +126,8 @@ class DockerCompose:
         check: bool = True,
     ) -> subprocess.CompletedProcess[str]:
         self._validate_service(service)
+        if self._server_id is not None:
+            return self.docker(["exec", self._server_id, *arguments], check=check)
         return self.compose(["exec", "-T", service, *arguments], check=check)
 
     def kill(self, service: str, signal: str) -> None:
@@ -166,6 +175,8 @@ class DockerCompose:
 
     def container_id(self, service: str) -> str:
         self._validate_service(service)
+        if self._server_id is not None:
+            return self._server_id
         result = self.compose(["ps", "-q", service])
         container_id = result.stdout.strip()
         if not container_id:

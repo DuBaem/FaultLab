@@ -65,6 +65,12 @@ Give the controller time to clean up. Its Docker commands have a 30-second timeo
 
 ## Rehearse the explanation
 
+For a live demonstration, run `python -m faultlab.dashboard` from the project folder with the server running. Start with **Delay, then packet loss**. Point to the planned and confirmed starts in the table, then open the results and expand the request timeline. Choose a request that crossed into a fault and one that spent its whole lifetime inside it. Only the second counts toward that fault's HTTP results.
+
+In the [November 22 ten-trial report](evidence/experiment-2026-11-22/report.html), all 40 recovery probes succeeded. Across the confirmed packet-loss windows, 15 of 64 HTTP requests timed out. Nine trials had at least one timeout. The configured loss was 25% of outgoing packets. TCP can retransmit a dropped packet, so a request can finish successfully after taking longer.
+
+Select **Replay saved run** and open the [saved first trial](evidence/experiment-2026-11-22/experiment.json). In our [saved replay comparison](evidence/experiment-2026-11-22/replay-series.json), ten requests could be paired across the two confirmed fault windows. Eight pairs had the same outcome. Both original failures succeeded on replay. This is a useful case to show during the presentation because it illustrates how outcomes vary with the same settings.
+
 1. Show a healthy request and its doubled result.
 2. Open the scenario and point to its target, start time, and duration.
 3. Show what changed for the client, then find the matching events in the log.

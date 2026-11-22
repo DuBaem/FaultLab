@@ -13,7 +13,7 @@ flowchart LR
     E --> F[Compare the two runs]
 ```
 
-On this branch you can run the baseline, try all four faults, read the controller's event log, and verify recovery. Chidera's recording, replay, and comparison work is being integrated separately.
+The experiment dashboard runs the local workload, shows when each fault takes effect, and checks that the server recovers. It can rerun a saved scenario and compare requests. Chidera's separate recorder and event-replay work uses the shared controller log.
 
 ## Run the client and server
 
@@ -61,6 +61,29 @@ docker compose run --rm --build baseline
 ```
 
 By default the baseline sends 20 requests. Open the timestamped JSON file in `results/` and check `summary.successful_requests` and `summary.latency_ms.mean`. The baseline can finish even when individual requests fail.
+
+### Run a measured experiment
+
+With the server running and the Python environment active, open the dashboard from the FaultLab folder.
+
+```powershell
+python -m faultlab.dashboard
+```
+
+Choose **Delay, then packet loss** and click **Start experiment**. The dots show successful requests, crosses show failed requests, and shading shows when the controller confirmed each fault was active. Choose a single fault to change its duration or its delay or loss setting. Choose 5 or 10 trials to see how much the results vary.
+
+**Open results** opens a self-contained HTML report you can share. Expand a trial to see which requests landed inside each fault. **Replay saved run** accepts an `experiment.json` from an earlier trial and compares the new outcomes with that original. **Stop after cleanup** ends an experiment early and lets the controller restore the server. **Reset stack** rebuilds the local server and verifies recovery.
+
+The same experiment runs from PowerShell:
+
+```powershell
+python -m faultlab.experiment --scenario scenarios/demo-latency-packet-loss.json --trials 5
+python -m faultlab.experiment --replay docs/evidence/experiment-2026-11-22/experiment.json --trials 1
+```
+
+Results go in `results/series/`. For a completed example, see the [ten-trial results](docs/evidence/experiment-2026-11-22/report.html) and the [recorded metrics](docs/evidence/experiment-2026-11-22/series.json).
+
+### Run the workload and controller separately
 
 For the two-fault demo, first preview the schedule. A dry run writes example events without changing Docker:
 
@@ -119,3 +142,5 @@ We work on individual branches, test our changes, and open a pull request for a 
 ## Development assistance disclosure
 
 On October 4, 2026, Codex generated the initial scenario-validator. On October 22, it helped develop the fault adapters, controller, and tests. On November 20 it helped develop and test the reliability changes.
+
+On November 22, Codex helped implement and test the scheduling changes, measured experiment runner, dashboard, and results report.

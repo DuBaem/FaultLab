@@ -222,4 +222,5 @@ __marimo__/
 results/*.json
 results/experiments/
 results/fault-safety/
+results/series/
 !results/.gitkeep

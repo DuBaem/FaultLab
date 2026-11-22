@@ -90,6 +90,8 @@ def run_request(server_url, request_id, value, timeout_s):
         "success": False,
         "latency_ms": None,
         "error": None,
+        "timed_out": False,
+        "started_at": datetime.now(timezone.utc).isoformat(),
     }
 
     payload = {"request_id": request_id, "value": value}
@@ -104,6 +106,8 @@ def run_request(server_url, request_id, value, timeout_s):
         result["latency_ms"] = latency_ms
 
         body = response.json()
+        if not isinstance(body, dict):
+            raise ValueError("expected a JSON object from /process")
 
         # A request only counts as a pass if every field matches what we expect back.
         is_valid = (
@@ -123,7 +127,9 @@ def run_request(server_url, request_id, value, timeout_s):
     except (requests.RequestException, ValueError) as exc:
         # Record the failure instead of letting one bad request stop the whole run.
         result["error"] = str(exc)
+        result["timed_out"] = isinstance(exc, requests.exceptions.Timeout)
 
+    result["finished_at"] = datetime.now(timezone.utc).isoformat()
     return result
 
 

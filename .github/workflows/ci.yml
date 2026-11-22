@@ -32,6 +32,7 @@ jobs:
           tests/test_fault_adapters.py
           tests/test_controller.py
           tests/test_safety_check.py
+          tests/test_experiment.py
           -v
 
   docker-smoke:
@@ -74,6 +75,17 @@ jobs:
         with:
           name: fault-safety-evidence
           path: results/fault-safety/
+          if-no-files-found: ignore
+
+      - name: Run a measured scenario with automatic request attribution
+        run: python -m faultlab.experiment --scenario scenarios/demo-latency-packet-loss.json --trials 1
+
+      - name: Save experiment results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: measured-experiment
+          path: results/series/
           if-no-files-found: ignore
 
       - name: Tear down Docker

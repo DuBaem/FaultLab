@@ -1,0 +1,40 @@
+{
+  "requested_trials": 1,
+  "status": "passed",
+  "runs": [
+    "report-two-network-demo-20261122T224316Z-139f8566"
+  ],
+  "comparisons": [
+    {
+      "original_run_id": "report-two-network-demo-20261122T160915Z-b2973eb6",
+      "repeat_run_id": "report-two-network-demo-20261122T224316Z-139f8566",
+      "matched_requests": 10,
+      "original_requests": 11,
+      "repeat_requests": 16,
+      "matching_outcomes": 8,
+      "matched_original_failures": 2,
+      "reproduced_failures": 0,
+      "failure_reproduction_percent": 0.0
+    }
+  ],
+  "metrics": {
+    "add-250ms-delay": {
+      "trials": 1,
+      "mean_absolute_start_error_ms": 406.1578999971971,
+      "mean_latency_stddev_between_trials_ms": null,
+      "trials_with_failures": 0,
+      "trials_with_observations": 1,
+      "failures": 0,
+      "timeouts": 0
+    },
+    "drop-25-percent": {
+      "trials": 1,
+      "mean_absolute_start_error_ms": 515.9357999800704,
+      "mean_latency_stddev_between_trials_ms": null,
+      "trials_with_failures": 1,
+      "trials_with_observations": 1,
+      "failures": 1,
+      "timeouts": 1
+    }
+  }
+}

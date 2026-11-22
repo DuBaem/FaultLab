@@ -54,6 +54,16 @@ Use one controller per stack. If the controller is forcibly killed or Docker sto
 
 ## Integrating the recorder
 
+The measured runner saves each trial under `results/series/<series-id>/<run-id>/`. Its `experiment.json` contains the scenario, confirmed controller events and timestamped HTTP requests. The workload and controller run on the same host. Requests always send 10 to the local server and expect 20 back. The separate Docker baseline still measures requests from inside the Compose network.
+
+The action summary uses seconds from the controller's monotonic clock. Compare `planned_start_seconds`, `dispatch_seconds`, and `observed_start_seconds` to see when the controller meant to start, began applying the fault, and received confirmation. `apply_overhead_seconds` includes event logging and the Docker operation. The controller resolves the server container before starting the clock. It keeps each fault active for the requested duration after confirmation, even when a previous action finishes late.
+
+Each HTTP request records start and finish in UTC. A request counts toward an action only when its entire lifetime fits between `fault_applied` and `fault_cleanup_started`. Requests that cross an edge keep the phase `boundary` in the timeline. A short window may contain no complete requests. The summary counts timed-out requests among HTTP failures and computes mean HTTP latency from successful responses only.
+
+After each action, the live controller checks the server's original network membership and service alias, the network queue, and a fresh HTTP response. The next action waits for those checks. After each measured trial, four recovery probes must succeed before another trial starts. A passed trial can still contain HTTP failures during injection.
+
+For repeats, `series.json` records the mean absolute difference between planned and confirmed start, and the sample standard deviation of trial mean HTTP times. Each comparison pairs requests by action and order within the confirmed window. It records both sample counts and how many pairs were available. The failure reproduction percentage uses only matched requests that failed in the original. With no such failures the value is null. A replay repeats the same scenario and input workload. Packet loss can select different packets on each run.
+
 Dubem owns the baseline, reset, and end-to-end integration. Fidel owns scenario validation, fault timing, and immediate cleanup. Chidera owns observations, replay, and comparison. Keep the event names and run IDs when adding observations so a replay can be traced back to its original run. Discuss changes to a shared field with the people who read it before merging.
 
 OpenAI Codex helped draft this contract on October 22, 2026, and revise it on November 20. The team must review, revise, understand, and document the AI-assisted work it uses for the course.

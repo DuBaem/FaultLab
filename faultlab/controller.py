@@ -12,12 +12,14 @@ import json
 import sys
 import time
 import uuid
+from contextlib import nullcontext
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Protocol
 
-from faultlab.fault_adapters import DryRunFaultExecutor, FaultExecutor, FaultHandle
+from faultlab.fault_adapters import DryRunFaultExecutor, FaultHandle
+from faultlab.local_stack import CheckedExecutor, stack_lock
 from faultlab.scenario_validator import (
     ScenarioValidationError,
     ValidationIssue,
@@ -89,6 +91,14 @@ def _schedule_issues(document: Mapping[str, Any]) -> list[ValidationIssue]:
     return issues
 
 
+def check_schedule(document: Mapping[str, Any]) -> None:
+    issues = validate_scenario(document)
+    if not issues:
+        issues.extend(_schedule_issues(document))
+    if issues:
+        raise ScenarioValidationError(issues)
+
+
 def _run_id(scenario_id: str, now: datetime) -> str:
     timestamp = now.astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     return f"{scenario_id}-{timestamp}-{uuid.uuid4().hex[:8]}"
@@ -103,14 +113,11 @@ def execute_scenario(
     sleep: Callable[[float], None] = time.sleep,
     now: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
     time_scale: float = 1.0,
+    on_event: Callable[[dict], None] | None = None,
 ) -> dict[str, Any]:
     """Check the schedule, run it, and return the summary saved in the run folder."""
 
-    issues = validate_scenario(document)
-    if not issues:
-        issues.extend(_schedule_issues(document))
-    if issues:
-        raise ScenarioValidationError(issues)
+    check_schedule(document)
     if not 0 <= time_scale <= 1:
         raise ValueError("time_scale must be between 0 and 1")
 
@@ -139,15 +146,20 @@ def execute_scenario(
     logging_errors: list[str] = []
     cleanup_errors: list[str] = []
 
+    def emit(event_type: str, **fields: Any) -> None:
+        event = journal.emit(event_type, **fields)
+        if on_event is not None:
+            on_event(event)
+
     def recovery_event(event_type: str, **fields: Any) -> None:
         # An unavailable event file must never prevent reversing an active fault.
         try:
-            journal.emit(event_type, **fields)
+            emit(event_type, **fields)
         except Exception as exc:
             logging_errors.append(f"{event_type}: {type(exc).__name__}: {exc}")
 
     try:
-        journal.emit(
+        emit(
             "run_started",
             description=document["description"],
             dry_run=time_scale == 0,
@@ -166,7 +178,7 @@ def execute_scenario(
                 sleep(wait_seconds)
 
             observed_start = monotonic() - start_clock
-            journal.emit(
+            emit(
                 "fault_apply_started",
                 action_id=action["id"],
                 fault_type=action["type"],
@@ -180,7 +192,7 @@ def execute_scenario(
             handle = executor.apply(action, service)
             active.append(handle)
             applied_offset = monotonic() - start_clock
-            journal.emit(
+            emit(
                 "fault_applied",
                 action_id=action["id"],
                 fault_type=action["type"],
@@ -190,11 +202,13 @@ def execute_scenario(
                 observed_offset_seconds=applied_offset,
             )
 
-            duration = float(action["duration_seconds"]) * time_scale
-            if duration:
-                sleep(duration)
+            cleanup_due = start_clock + applied_offset + float(action["duration_seconds"]) * time_scale
+            remaining = cleanup_due - monotonic()
+            if remaining > 0:
+                sleep(remaining)
 
-            journal.emit(
+            cleanup_start = monotonic() - start_clock
+            emit(
                 "fault_cleanup_started",
                 action_id=action["id"],
                 fault_type=action["type"],
@@ -204,7 +218,7 @@ def execute_scenario(
             executor.cleanup(handle)
             active.remove(handle)
             observed_end = monotonic() - start_clock
-            journal.emit(
+            emit(
                 "fault_cleaned",
                 action_id=action["id"],
                 fault_type=action["type"],
@@ -221,6 +235,11 @@ def execute_scenario(
                     "service": service,
                     "planned_start_seconds": planned_start,
                     "observed_start_seconds": applied_offset,
+                    "dispatch_seconds": observed_start,
+                    "dispatch_drift_seconds": observed_start - planned_start * time_scale,
+                    "apply_overhead_seconds": applied_offset - observed_start,
+                    "cleanup_started_seconds": cleanup_start,
+                    "cleanup_overhead_seconds": observed_end - cleanup_start,
                     "start_drift_seconds": applied_offset - planned_start * time_scale,
                     "planned_end_seconds": planned_end,
                     "observed_end_seconds": observed_end,
@@ -308,13 +327,14 @@ def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
     try:
         document = load_and_validate(args.scenario)
-        executor: Executor = DryRunFaultExecutor() if args.dry_run else FaultExecutor()
-        summary = execute_scenario(
-            document,
-            executor=executor,
-            results_dir=args.results_dir,
-            time_scale=0 if args.dry_run else 1,
-        )
+        with nullcontext() if args.dry_run else stack_lock():
+            executor: Executor = DryRunFaultExecutor() if args.dry_run else CheckedExecutor()
+            summary = execute_scenario(
+                document,
+                executor=executor,
+                results_dir=args.results_dir,
+                time_scale=0 if args.dry_run else 1,
+            )
     except (ScenarioValidationError, ScenarioExecutionError, RuntimeError) as exc:
         print(str(exc), file=sys.stderr)
         return 1

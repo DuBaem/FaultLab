@@ -3,7 +3,7 @@ import os
 import pytest
 import requests
 
-import baseline
+from baseline import baseline
 
 SERVER_URL = os.getenv("SERVER_URL", "http://127.0.0.1:5000")
 

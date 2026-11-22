@@ -4,6 +4,7 @@ import sys
 import time
 
 import requests
+from faultlab.local_stack import stack_lock
 
 
 def load_config():
@@ -65,8 +66,10 @@ def verify_no_active_netem():
     return result.returncode == 0 and "netem" not in result.stdout.lower()
 
 
-def main():
+def main(server_url_override=None):
     server_url, health_timeout = load_config()
+    if server_url_override is not None:
+        server_url = server_url_override
 
     try:
         print("Stopping current environment...")
@@ -110,4 +113,9 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        with stack_lock():
+            sys.exit(main())
+    except RuntimeError as exc:
+        print(f"RESET FAILED: {exc}")
+        sys.exit(1)

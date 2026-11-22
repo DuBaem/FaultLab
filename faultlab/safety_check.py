@@ -19,6 +19,7 @@ from pathlib import Path
 from faultlab.controller import execute_scenario
 from faultlab.docker_cli import DockerCompose
 from faultlab.fault_adapters import FaultExecutor
+from faultlab.local_stack import ensure_local_engine, stack_lock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -141,6 +142,7 @@ def restored_state(docker, expected_networks):
 
 def run_checks(trials: int, results_dir: Path) -> tuple[Path, dict]:
     docker = DockerCompose()
+    ensure_local_engine(docker)
     docker.wait_until_healthy("server")
     networks = set(json.loads(docker.docker([
         "inspect", "--format", "{{json .NetworkSettings.Networks}}",
@@ -187,6 +189,8 @@ def run_checks(trials: int, results_dir: Path) -> tuple[Path, dict]:
                                          "evaluation": evaluation})
                 print(f"  {'PASS' if evaluation['passed'] else 'FAIL'} {evaluation}", flush=True)
                 (output / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
+                if not clean or not evaluation["checks"]["recovery_success"]:
+                    raise RuntimeError("Recovery check failed. Stop the series and run reset.py.")
 
         def interrupt_after_apply(seconds):
             time.sleep(min(seconds, 1))
@@ -237,12 +241,13 @@ def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Measure requests before, during, and after faults on the local FaultLab server."
     )
-    parser.add_argument("--trials", type=int, choices=range(1, 6), default=2,
+    parser.add_argument("--trials", type=int, choices=range(1, 11), default=2,
                         help="how many times to run each of the four faults (default: 2)")
     parser.add_argument("--results-dir", type=Path, default=Path("results/fault-safety"),
                         help="where to save the trial table, request details, and event logs")
     args = parser.parse_args(argv)
-    output, report = run_checks(args.trials, args.results_dir)
+    with stack_lock():
+        output, report = run_checks(args.trials, args.results_dir)
     print(f"Fault safety {'PASSED' if report['passed'] else 'FAILED'}: {output}")
     return 0 if report["passed"] else 1
 

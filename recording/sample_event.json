@@ -1,0 +1,15 @@
+
+{
+  "run_id": "run_001",
+  "event_id": "evt_001",
+  "sequence_number": 1,
+  "fault_type": "delay", 
+  "target": "server",
+  "parameters": {
+    "delay_ms": 1500
+  },
+  "scheduled_time_ms": 2000,
+  "actual_time_ms": 2043,
+  "status": "success",
+  "error_message": null
+}

@@ -4,6 +4,15 @@ FaultLab is a Docker-based Linux network fault injection, recording, and replay 
 
 The project is designed to test how a client-server application behaves under controlled failures such as network delay, packet loss, temporary disconnection, and process failure.
 
+## View a saved experiment
+
+Open [the results dashboard](dashboard/index.html) in your browser. On GitHub, open that file, click **Download raw file**, and double-click the downloaded HTML. The page works offline. It opens with a labeled dry run from Chidera's experiment runner. The HTTP requests in the example are real, and the fault was simulated.
+
+* **Open run folder** reads one folder from `results/experiments/<run-id>/`. It needs `summary.json` and `observations.json`. If available, it uses `events.jsonl` for the fault windows, `scenario.json` for the settings, and `replay_metadata.json` for the original run ID. Select the folder for a single run.
+* **Open comparison JSON** displays a saved comparison from `recording/comparator.py` or an aggregate report from `recording/aggregate_results.py`. The dashboard displays the recorder's agreement and coverage values directly.
+
+The example was generated with `recording/experiment_runner.py` at commit [aee3ae3](https://github.com/DuBaem/FaultLab/tree/aee3ae32008ca9dc4ff9358562e6d99319332b8f). Codex helped build the viewer and check it against the runner's output on November 27, 2026.
+
 ## Intended Workflow
 
 **Normal System → Baseline → Inject → Record → Reset → Replay → Compare**

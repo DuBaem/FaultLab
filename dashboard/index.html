@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FaultLab · Experiment dashboard</title>
+<style>
+:root{color-scheme:light;--ink:#172f37;--muted:#49616a;--line:#ccd9d8;--brand:#00685d;--paper:#fff;--page:#f2f5f2;--error:#ae3e32;--warm:#f6ddb0}
+*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--ink);font:16px/1.5 "Segoe UI",Arial,sans-serif}
+header{background:#17353d;color:white}.bar,main{max-width:1200px;margin:auto}.bar{padding:16px clamp(16px,4vw,48px);display:flex;align-items:center;gap:18px}.bar strong{font-size:22px;letter-spacing:-1px}.bar span{border-left:1px solid #709098;padding-left:18px}
+main{padding:30px clamp(16px,4vw,48px) 60px}.top,.panelhead{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}h1,h2,h3,p{margin:0}h1{font-size:clamp(27px,4vw,40px);letter-spacing:-1.3px}h2{font-size:21px;letter-spacing:-.5px}h3{font-size:16px}.controls{display:flex;gap:8px;flex-wrap:wrap}
+button,select{font:inherit;color:var(--ink);border:1px solid #9aafae;background:white;padding:8px 13px;border-radius:6px;cursor:pointer}button.primary{background:var(--brand);border-color:var(--brand);color:white;font-weight:600}button:hover,select:hover{filter:brightness(.95)}:focus-visible{outline:3px solid #c57116;outline-offset:3px}
+.sub,small{color:var(--muted)}.sub{margin:4px 0 12px;overflow-wrap:anywhere}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}.metric,.panel{background:var(--paper);border:1px solid var(--line);border-radius:9px}.metric{padding:13px 18px}.metric small{display:block}.metric b{display:block;font-size:clamp(22px,3vw,32px);font-variant-numeric:tabular-nums;letter-spacing:-1px}.panel{margin:14px 0;padding:20px}.panelhead{margin-bottom:12px}.plot{display:block;width:100%;height:auto;min-height:150px}.legend{font-size:13px;color:var(--muted)}.legend b{color:var(--brand)}.legend .failure{color:var(--error)}.legend .window{color:#806021}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px;text-align:left;font-variant-numeric:tabular-nums}th{color:var(--muted);font-weight:600}th,td{padding:8px 10px;border-bottom:1px solid #e1e8e7;vertical-align:top}tr:last-child td{border-bottom:0}caption{text-align:left;margin-bottom:8px;color:var(--muted)}.warning{font-weight:600;color:var(--error);margin:8px 0}summary{cursor:pointer;font-weight:650}details table{margin-top:10px}svg text{fill:var(--muted);font:13px "Segoe UI",Arial,sans-serif}.filter{font-size:14px}.message{padding:10px 0}.axis-note{margin-top:3px}
+@media(max-width:720px){.metrics{grid-template-columns:repeat(2,1fr)}.panel{padding:12px}.bar{padding-block:10px}.top{gap:8px}.legend{line-height:1.9}}
+</style>
+</head>
+<body>
+<header><div class="bar"><strong>FaultLab</strong><span>Experiment dashboard</span></div></header>
+<main>
+<div class="top"><h1 id="heading">Run overview</h1><div class="controls">
+<button class="primary" id="open-run">Open run folder</button><button id="open-report">Open comparison JSON</button><button id="example-button">Show example</button>
+</div></div>
+<input hidden id="run-picker" type="file" webkitdirectory multiple><input hidden id="report-picker" type="file" accept=".json,application/json">
+<p class="sub" id="identity"></p><p class="warning" id="error" role="alert"></p>
+<div id="content"></div>
+</main>
+<script id="example" type="application/json">{"summary.json":{"run_id":"server-latency-demo-20261128T013844Z-a3188521","scenario_id":"server-latency-demo","status":"passed","dry_run":true,"started_at":"2026-11-28T01:38:44.390689+00:00","finished_at":"2026-11-28T01:38:44.404383+00:00","actions_completed":1,"actions_requested":1,"actions":[{"action_id":"delay-server","fault_type":"latency","target":"api-server","service":"server","planned_start_seconds":2.0,"observed_start_seconds":0.006228399986866862,"start_drift_seconds":0.006228399986866862,"planned_end_seconds":10.0,"observed_end_seconds":0.010343400004785508,"cleanup_verified":true}],"cleanup_errors":[],"error":null,"event_log":"events.jsonl","scenario_snapshot":"scenario.json"},"observations.json":{"run_id":"server-latency-demo-20261128T013844Z-a3188521","recorded_at_utc":"2026-11-28T01:38:46.047012+00:00","request_count":14,"observations":[{"request_id":"request-0000","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":12.374000041745603,"error":null,"started_at_utc":"2026-11-28T01:38:44.390820+00:00","finished_at_utc":"2026-11-28T01:38:44.403452+00:00","elapsed_since_start_s":0.0007},{"request_id":"request-0001","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":5.029000050853938,"error":null,"started_at_utc":"2026-11-28T01:38:44.514127+00:00","finished_at_utc":"2026-11-28T01:38:44.519278+00:00","elapsed_since_start_s":0.124},{"request_id":"request-0002","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":4.46120003471151,"error":null,"started_at_utc":"2026-11-28T01:38:44.630880+00:00","finished_at_utc":"2026-11-28T01:38:44.635444+00:00","elapsed_since_start_s":0.2407},{"request_id":"request-0003","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":6.468500010669231,"error":null,"started_at_utc":"2026-11-28T01:38:44.747764+00:00","finished_at_utc":"2026-11-28T01:38:44.754391+00:00","elapsed_since_start_s":0.3576},{"request_id":"request-0004","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":3.97380004869774,"error":null,"started_at_utc":"2026-11-28T01:38:44.864222+00:00","finished_at_utc":"2026-11-28T01:38:44.868305+00:00","elapsed_since_start_s":0.4741},{"request_id":"request-0005","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":23.428000044077635,"error":null,"started_at_utc":"2026-11-28T01:38:44.978097+00:00","finished_at_utc":"2026-11-28T01:38:45.001729+00:00","elapsed_since_start_s":0.5879},{"request_id":"request-0006","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":4.072999989148229,"error":null,"started_at_utc":"2026-11-28T01:38:45.114354+00:00","finished_at_utc":"2026-11-28T01:38:45.118534+00:00","elapsed_since_start_s":0.7242},{"request_id":"request-0007","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":17.625800042878836,"error":null,"started_at_utc":"2026-11-28T01:38:45.228195+00:00","finished_at_utc":"2026-11-28T01:38:45.245995+00:00","elapsed_since_start_s":0.838},{"request_id":"request-0008","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":2.8894999995827675,"error":null,"started_at_utc":"2026-11-28T01:38:45.346970+00:00","finished_at_utc":"2026-11-28T01:38:45.349946+00:00","elapsed_since_start_s":0.9568},{"request_id":"request-0009","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":3.8769000093452632,"error":null,"started_at_utc":"2026-11-28T01:38:45.463407+00:00","finished_at_utc":"2026-11-28T01:38:45.467384+00:00","elapsed_since_start_s":1.0732},{"request_id":"request-0010","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":3.842799982521683,"error":null,"started_at_utc":"2026-11-28T01:38:45.580544+00:00","finished_at_utc":"2026-11-28T01:38:45.584487+00:00","elapsed_since_start_s":1.1904},{"request_id":"request-0011","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":3.4801000147126615,"error":null,"started_at_utc":"2026-11-28T01:38:45.696464+00:00","finished_at_utc":"2026-11-28T01:38:45.700031+00:00","elapsed_since_start_s":1.3063},{"request_id":"request-0012","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":4.924500011838973,"error":null,"started_at_utc":"2026-11-28T01:38:45.812278+00:00","finished_at_utc":"2026-11-28T01:38:45.817348+00:00","elapsed_since_start_s":1.4221},{"request_id":"request-0013","input_value":10,"expected_result":20,"observed_result":20,"http_status":200,"success":true,"latency_ms":5.703800008632243,"error":null,"started_at_utc":"2026-11-28T01:38:45.929397+00:00","finished_at_utc":"2026-11-28T01:38:45.935214+00:00","elapsed_since_start_s":1.5392}]},"scenario.json":{"actions":[{"duration_seconds":8,"id":"delay-server","parameters":{"jitter_ms":25,"latency_ms":250},"start_after_seconds":2,"target":"api-server","type":"latency"}],"description":"Add bounded latency to the local server during the sample workload.","expected_outcomes":["Requests remain successful while observed response time increases.","The server returns to its baseline health state after cleanup."],"safety":{"cleanup_required":true,"max_total_duration_seconds":30,"scope":"local_docker_only"},"scenario_id":"server-latency-demo","schema_version":"1.0","targets":[{"name":"api-server","service":"server"}]},"events.jsonl":[{"action_count":1,"description":"Add bounded latency to the local server during the sample workload.","dry_run":true,"event_type":"run_started","run_id":"server-latency-demo-20261128T013844Z-a3188521","scenario_id":"server-latency-demo","sequence":1,"timestamp_utc":"2026-11-28T01:38:44.393205+00:00"},{"action_id":"delay-server","event_type":"fault_apply_started","fault_type":"latency","observed_offset_seconds":0.0009610999841243029,"parameters":{"jitter_ms":25,"latency_ms":250},"planned_offset_seconds":2.0,"run_id":"server-latency-demo-20261128T013844Z-a3188521","scenario_id":"server-latency-demo","sequence":2,"service":"server","target":"api-server","timestamp_utc":"2026-11-28T01:38:44.394161+00:00"},{"action_id":"delay-server","event_type":"fault_applied","fault_type":"latency","observed_offset_seconds":0.006228399986866862,"planned_offset_seconds":2.0,"run_id":"server-latency-demo-20261128T013844Z-a3188521","scenario_id":"server-latency-demo","sequence":3,"service":"server","target":"api-server","timestamp_utc":"2026-11-28T01:38:44.399431+00:00"},{"action_id":"delay-server","event_type":"fault_cleanup_started","fault_type":"latency","run_id":"server-latency-demo-20261128T013844Z-a3188521","scenario_id":"server-latency-demo","sequence":4,"service":"server","target":"api-server","timestamp_utc":"2026-11-28T01:38:44.401440+00:00"},{"action_id":"delay-server","event_type":"fault_cleaned","fault_type":"latency","observed_offset_seconds":0.010343400004785508,"planned_offset_seconds":10.0,"run_id":"server-latency-demo-20261128T013844Z-a3188521","scenario_id":"server-latency-demo","sequence":5,"service":"server","target":"api-server","timestamp_utc":"2026-11-28T01:38:44.403551+00:00"},{"event_type":"run_completed","run_id":"server-latency-demo-20261128T013844Z-a3188521","scenario_id":"server-latency-demo","sequence":6,"status":"passed","summary":"summary.json","timestamp_utc":"2026-11-28T01:38:44.406050+00:00"}]}</script>
+<script>
+"use strict";
+const el = id => document.getElementById(id);
+const fmt = (n, digits = 0) => Number.isFinite(n) ? n.toLocaleString("en-US", {maximumFractionDigits: digits}) : "—";
+const unit = (n, suffix, digits) => Number.isFinite(n) ? fmt(n, digits) + suffix : "—";
+const time = value => typeof value === "string" ? Date.parse(value) : NaN;
+const validId = value => typeof value === "string" && value.length > 0;
+const filesRead = ["summary.json","observations.json","events.jsonl","scenario.json","replay_metadata.json"];
+function node(tag, text, cls) {
+  const element = document.createElement(tag);
+  if (text != null) element.textContent = text;
+  if (cls) element.className = cls;
+  return element;
+}
+function section(parent, title) {
+  const block = node("section", null, "panel");
+  const head = node("div", null, "panelhead");
+  head.append(node("h2", title)); block.append(head); parent.append(block);
+  return block;
+}
+function cards(parent, values) {
+  const grid = node("div", null, "metrics");
+  for (const [label,value] of values) {
+    const entry = node("div", null, "metric");
+    entry.append(node("small",label), node("b",value)); grid.append(entry);
+  }
+  parent.append(grid);
+}
+function table(parent, headings, rows) {
+  const wrap = node("div",null,"scroll"), t = node("table"), head = t.createTHead().insertRow();
+  for (const name of headings) { const th = node("th",name); th.scope="col"; head.append(th); }
+  const body = t.createTBody();
+  for (const values of rows) {
+    const tr = body.insertRow();
+    for (const value of values) tr.insertCell().textContent = value ?? "—";
+  }
+  wrap.append(t); parent.append(wrap);
+}
+function eventsFrom(text) {
+  return text.trim().split(/\r?\n/).filter(Boolean).map((line,i) => {
+    try {return JSON.parse(line);} catch {throw Error("Invalid JSON on event log line " + (i+1));}
+  });
+}
+function validateRun(bundle) {
+  const summary = bundle["summary.json"], obs = bundle["observations.json"];
+  if (!validId(summary?.run_id) || !validId(summary?.scenario_id) || !Array.isArray(summary.actions))
+    throw Error("Choose one runner output folder containing summary.json.");
+  if (!obs || !Array.isArray(obs.observations)) throw Error("This folder has no saved request observations.");
+  if (obs.run_id !== summary.run_id) throw Error("The observations and summary belong to different runs.");
+  if (obs.observations.some(r => !r || !validId(r.request_id) || typeof r.success !== "boolean"))
+    throw Error("A request is missing its ID or recorded outcome.");
+  const events = bundle["events.jsonl"] ?? [];
+  if (!Array.isArray(events) || events.some(e => e?.run_id !== summary.run_id || !validId(e.event_type)))
+    throw Error("The event log is invalid or belongs to a different run.");
+  if (bundle["scenario.json"] && bundle["scenario.json"].scenario_id !== summary.scenario_id)
+    throw Error("The scenario and summary IDs differ.");
+  if (bundle["replay_metadata.json"] && bundle["replay_metadata.json"].replay_run_id !== summary.run_id)
+    throw Error("The replay metadata belongs to a different run.");
+  return {summary, observations:obs.observations, events, scenario:bundle["scenario.json"], replay:bundle["replay_metadata.json"]};
+}
+function timeline(parent, run) {
+  const panel=section(parent,"Request timeline");
+  const points=run.observations.map(row=>[time(row.finished_at_utc),row]).filter(([t])=>Number.isFinite(t));
+  if (!points.length) {panel.append(node("p","No timestamped requests were recorded.","sub"));return panel;}
+  const ends = new Map(), windows=[];
+  for (const event of run.events) {
+    const when = time(event.timestamp_utc);
+    if (!Number.isFinite(when)) continue;
+    if (event.event_type === "fault_applied") ends.set(event.action_id,when);
+    if (event.event_type === "fault_cleanup_started" && ends.has(event.action_id)) {
+      windows.push([ends.get(event.action_id),when]); ends.delete(event.action_id);
+    }
+  }
+  const allTimes=points.map(p=>p[0]).concat(windows.flat());
+  const start=time(run.summary.started_at);
+  const origin=Number.isFinite(start)?start:points[0][0];
+  const lo=allTimes.reduce((a,b)=>Math.min(a,b),origin), hi=allTimes.reduce((a,b)=>Math.max(a,b),lo+1);
+  const maxMs=Math.max(1,points.reduce((a,[,r])=>r.success && Number.isFinite(r.latency_ms)?Math.max(a,r.latency_ms):a,0));
+  const width=Math.min(920,Math.max(245,document.documentElement.clientWidth-72));
+  const right=width-26, left=54;
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("viewBox","0 0 "+width+" 225");svg.setAttribute("class","plot");svg.setAttribute("role","img");
+  svg.setAttribute("aria-label","Successful HTTP response times and failed requests across the run. See the records below for individual values.");
+  function draw(tag,attrs,label){
+    const e=document.createElementNS(svg.namespaceURI,tag);
+    for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,String(v));
+    if(label!=null)e.textContent=label; svg.append(e); return e;
+  }
+  const x=t=>left+(right-left)*(t-lo)/(hi-lo), y=v=>158-125*v/maxMs;
+  for(const [a,b] of windows)draw("rect",{x:x(a),y:19,width:Math.max(1,x(b)-x(a)),height:169,fill:"#f6ddb0"});
+  for(let i=0;i<4;i++){
+    const n=maxMs*i/3; draw("line",{x1:left,x2:right,y1:y(n),y2:y(n),stroke:"#d4dfde"});
+    draw("text",{x:46,y:y(n)+4,"text-anchor":"end"},fmt(n,1));
+  }
+  draw("text",{x:54,y:14},"Response time (ms)");
+  for(let i=0;i<5;i++){
+    const t=lo+(hi-lo)*i/4;
+    draw("text",{x:x(t),y:205,"text-anchor":"middle"},fmt((t-origin)/1000,2));
+  }
+  draw("text",{x:(left+right)/2,y:222,"text-anchor":"middle"},"Seconds from controller start");
+  for(const [t,row] of points){
+    if(row.success && !Number.isFinite(row.latency_ms))continue;
+    const xx=x(t);
+    const mark=row.success?draw("circle",{cx:xx,cy:y(row.latency_ms),r:4.1,fill:"#00685d"}):
+        draw("path",{d:"M "+(xx-4)+" 174 l 8 8 m -8 0 l 8 -8",stroke:"#ae3e32","stroke-width":2,fill:"none"});
+    const title=document.createElementNS(svg.namespaceURI,"title");
+    title.textContent=row.request_id+" · "+(row.success?unit(row.latency_ms," ms",2):"Failed");mark.append(title);
+  }
+  const legend=node("p",null,"legend");
+  legend.append(node("b","● Success"),"　",node("b","× Failure","failure"));
+  if(windows.length)legend.append("　",node("b",run.summary.dry_run?"▧ Simulated window":"▧ Confirmed fault window","window"));
+  panel.append(svg,legend);
+  if (ends.size) panel.append(node("p","Some fault events have no recorded cleanup start. Only complete windows are shaded.","sub"));
+  return panel;
+}
+let redrawTimeline=null;
+window.addEventListener("resize",()=>{if(redrawTimeline)redrawTimeline();});
+function showRun(bundle,example=false) {
+  const run=validateRun(bundle), {summary:s,observations:rows}=run;
+  const area=document.createDocumentFragment();
+  const successes=rows.filter(row=>row.success).length;
+  const latencies=rows.filter(row=>row.success && Number.isFinite(row.latency_ms));
+  cards(area,[["Requests recorded",fmt(rows.length)],["Successful",fmt(successes)],["Failed",fmt(rows.length-successes)],
+    ["Mean successful response",unit(latencies.length?latencies.reduce((a,r)=>a+r.latency_ms,0)/latencies.length:null," ms",2)]]);
+  let plot=timeline(area,run);
+  const actions=section(area,"Fault schedule");
+  if (!s.actions.length) actions.append(node("p","The controller recorded no completed actions.","sub"));
+  else {
+    const settings=new Map((run.scenario?.actions || []).map(a=>[a.id,a.parameters]));
+    table(actions,["Action","Configured","Planned start","Observed start","Start drift","Cleanup"],s.actions.map(a=>[
+      a.action_id,settings.has(a.action_id)?Object.entries(settings.get(a.action_id)).map(([k,v])=>k+"="+v).join(", "):a.fault_type,
+      unit(a.planned_start_seconds," s",3),unit(a.observed_start_seconds," s",3),unit(a.start_drift_seconds," s",3),
+      s.dry_run?"Simulated":a.cleanup_verified===true?"Verified":a.cleanup_verified===false?"Failed":"Unknown"]));
+  }
+  if(s.error) actions.append(node("p",s.error,"warning"));
+  if(run.replay) actions.append(node("p","Replayed from "+ run.replay.original_run_id,"sub"));
+  if(run.events.length){
+    const details=node("details");
+    details.append(node("summary","Controller events (" + run.events.length + ")"));
+    table(details,["Sequence","Time (UTC)","Event","Action"],run.events.map(e=>
+      [e.sequence,e.timestamp_utc,e.event_type,e.action_id || "—"]));
+    actions.append(details);
+  }
+  const records=section(area,"Request records");
+  const filter=node("select");filter.setAttribute("aria-label","Filter requests");
+  for(const label of ["All requests","Failures only"]){filter.append(node("option",label));}
+  records.firstChild.append(filter);
+  const list=node("div");records.append(list);
+  function renderRows(){
+    list.replaceChildren();
+    const visible=filter.selectedIndex?rows.filter(r=>!r.success):rows;
+    if(!visible.length){list.append(node("p","No requests match this view.","sub"));return;}
+    table(list,["Request","Finished (UTC)","Outcome","HTTP status","Response time","Error"],visible.map(r=>[
+      r.request_id,r.finished_at_utc??"—",r.success?"Success":"Failed",r.http_status??"—",unit(r.latency_ms," ms",2),r.error || "—"]));
+  }
+  filter.onchange=renderRows;renderRows();
+  const mode=s.dry_run===true?"Dry run":s.dry_run===false?"Live run":"Recorded run";
+  finish("Run overview",(example?"Example · ":"")+mode+" · "+s.scenario_id+" · Controller "+s.status+" · "+s.run_id,area);
+  redrawTimeline=()=>{
+    const replacement=timeline(document.createDocumentFragment(),run);
+    plot.replaceWith(replacement);plot=replacement;
+  };
+}
+function showReport(doc) {
+  const area=document.createDocumentFragment();
+  if(Array.isArray(doc?.trials) && Number.isInteger(doc.trial_count) && doc.summary && "overall_outcome_agreement_pct" in doc.summary){
+    const s=doc.summary;
+    cards(area,[["Trial pairs",fmt(doc.trial_count)],["Requests compared",fmt(s.total_compared_requests)],["Outcome agreement",unit(s.overall_outcome_agreement_pct,"%",2)],["Request coverage",unit(s.overall_request_coverage_pct,"%",2)]]);
+    const sectionEl=section(area,"Original and replay trials");
+    table(sectionEl,["Original run","Replay run","Requests compared","Agreement","Coverage","Fault latency difference"],doc.trials.map(t=>[
+      t.original_run_id,t.replay_run_id,fmt(t.compared_requests),unit(t.outcome_match_rate,"%",2),unit(t.request_coverage_pct,"%",2),unit(t.during_fault_median_difference_pct,"%",2)]));
+    finish("Reproducibility report","Aggregate results saved by the recorder.",area);
+  }else if(validId(doc?.original_run_id) && validId(doc?.replay_run_id) && doc.outcome_comparison){
+    const o=doc.outcome_comparison;
+    cards(area,[["Original requests",fmt(o.original_requests)],["Replay requests",fmt(o.replay_requests)],["Matched by ID",fmt(o.compared_requests)],["Outcome agreement",unit(o.outcome_match_rate,"%",2)]]);
+    const sectionEl=section(area,"Original and replay");
+    table(sectionEl,["Measurement","Original","Replay"],[
+      ["Run ID",doc.original_run_id,doc.replay_run_id],["Failed requests",fmt(o.original_failures),fmt(o.replay_failures)],
+      ["Start drift",unit(doc.timing_comparison?.original_start_drift_seconds," s",3),unit(doc.timing_comparison?.replay_start_drift_seconds," s",3)],
+      ...["before","during","after"].map(phase=>["Median response time · "+phase,unit(doc.original_phases?.[phase]?.median_latency_ms," ms",2),unit(doc.replay_phases?.[phase]?.median_latency_ms," ms",2)])]);
+    finish("Replay comparison",doc.scenario_id,area);
+  }else throw Error("Choose a saved report from recording/comparator.py or recording/aggregate_results.py.");
+}
+function finish(title,description,area){
+  redrawTimeline=null;
+  el("heading").textContent=title;el("identity").textContent=description;
+  el("content").replaceChildren(area);el("error").textContent="";
+}
+let pending=0;
+async function loadSelection(picker,read){
+  const files=Array.from(picker.files); picker.value="";
+  if(!files.length)return;
+  const token=++pending;
+  try {const render=await read(files); if(token===pending)render();}
+  catch(error){if(token===pending)el("error").textContent=error.message;}
+}
+el("open-run").onclick=()=>el("run-picker").click();
+el("open-report").onclick=()=>el("report-picker").click();
+el("run-picker").onchange=event=>loadSelection(event.target,async files=>{
+  const bundle={};
+  for(const file of files){
+    if(!filesRead.includes(file.name) || (file.webkitRelativePath && file.webkitRelativePath.split("/").length!==2))continue;
+    const raw=await file.text();
+    try{bundle[file.name]=file.name==="events.jsonl"?eventsFrom(raw):JSON.parse(raw);}
+    catch(error){throw Error("Cannot read "+file.name+". "+error.message);}
+  }
+  return ()=>showRun(bundle);
+});
+el("report-picker").onchange=event=>loadSelection(event.target,async files=>{
+  const doc=JSON.parse(await files[0].text());return ()=>showReport(doc);
+});
+function example(){pending++;showRun(JSON.parse(el("example").textContent),true);}
+el("example-button").onclick=example;
+example();
+</script>
+</body></html>
